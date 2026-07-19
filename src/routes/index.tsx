@@ -615,7 +615,16 @@ function Visit() {
             <div>
               <dt className="tracking-eyebrow text-ivory/50">Hours</dt>
               <dd className="mt-2 font-serif text-lg">
-                Daily<br />7:00 AM — 2:00 AM
+                Sun — Wed<br />6:00 AM — 1:00 AM
+              </dd>
+              <dd className="mt-2 font-serif text-lg">
+                Thursday<br />6:00 AM — 2:00 AM
+              </dd>
+              <dd className="mt-2 font-serif text-lg">
+                Friday<br />12:30 PM — 2:00 AM
+              </dd>
+              <dd className="mt-2 font-serif text-lg">
+                Saturday<br />6:00 AM — 1:00 AM
               </dd>
             </div>
             <div>
@@ -690,7 +699,7 @@ function Footer() {
           <div className="md:col-span-3 md:col-start-7">
             <p className="tracking-eyebrow text-ivory/50">Visit</p>
             <p className="mt-4 font-serif text-lg leading-snug">
-              Saybawiyyah, Ar Rawdah<br />Riyadh 13211, Saudi Arabia<br />Daily 7 AM — 2 AM
+              Saybawiyyah, Ar Rawdah<br />Riyadh 13211, Saudi Arabia<br />Sun — Wed: 6 AM — 1 AM<br />Thu: 6 AM — 2 AM<br />Fri: 12:30 PM — 2 AM<br />Sat: 6 AM — 1 AM
             </p>
           </div>
 
