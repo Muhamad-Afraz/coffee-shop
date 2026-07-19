@@ -609,7 +609,7 @@ function Visit() {
             <div>
               <dt className="tracking-eyebrow text-ivory/50">Address</dt>
               <dd className="mt-2 font-serif text-lg">
-                Saybawiyyah, Ar Rawdah,<br />Riyadh 13211
+                Saybawiyyah, Ar Rawdah<br />Riyadh 13211, Saudi Arabia
               </dd>
             </div>
             <div>
@@ -690,7 +690,7 @@ function Footer() {
           <div className="md:col-span-3 md:col-start-7">
             <p className="tracking-eyebrow text-ivory/50">Visit</p>
             <p className="mt-4 font-serif text-lg leading-snug">
-              Saybawiyyah, Ar Rawdah,<br />Riyadh 13211<br />Daily 7 AM — 2 AM
+              Saybawiyyah, Ar Rawdah<br />Riyadh 13211, Saudi Arabia<br />Daily 7 AM — 2 AM
             </p>
           </div>
 
