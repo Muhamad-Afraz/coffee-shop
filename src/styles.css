@@ -96,6 +96,18 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  [dir="rtl"] body {
+    font-family: var(--font-arabic);
+    font-feature-settings: normal;
+  }
+  [dir="rtl"] .font-serif,
+  [dir="rtl"] .font-display {
+    font-family: var(--font-arabic);
+    letter-spacing: 0;
+  }
+  [dir="rtl"] .tracking-eyebrow {
+    letter-spacing: 0.12em;
+  }
   ::selection { background: var(--espresso); color: var(--ivory); }
 }
 
