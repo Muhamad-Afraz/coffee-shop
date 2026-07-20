@@ -8,7 +8,7 @@ const options: { value: Lang; label: string; native: string }[] = [
   { value: "ar", label: "العربية", native: "العربية" },
 ];
 
-export function LangSwitcher({ className = "", onSwitch }: { className?: string; onSwitch?: () => void }) {
+export function LangSwitcher({ className = "", light, onSwitch }: { className?: string; light?: boolean; onSwitch?: () => void }) {
   const { lang, setLang, t } = useI18n();
   const [open, setOpen] = useState(false);
 
@@ -18,12 +18,13 @@ export function LangSwitcher({ className = "", onSwitch }: { className?: string;
         <button
           type="button"
           className={[
-            "group inline-flex items-center gap-2 text-[0.72rem] tracking-eyebrow text-foreground/60 transition-colors hover:text-foreground focus:outline-none",
+            "group inline-flex items-center gap-2 text-[0.72rem] tracking-eyebrow transition-colors hover:text-foreground focus:outline-none",
+            light ? "text-white/60 hover:text-white" : "text-foreground/60",
             className,
           ].join(" ")}
           aria-label={t("langSwitcher.en") + " / " + t("langSwitcher.ar")}
         >
-          <Globe className="h-3.5 w-3.5 opacity-60 transition-opacity group-hover:opacity-100" strokeWidth={1.5} />
+          <Globe className="h-3.5 w-3.5 transition-opacity group-hover:opacity-100" strokeWidth={1.5} />
           <span>EN</span>
           <span className="opacity-40">/</span>
           <span className="font-arabic text-sm">ع</span>

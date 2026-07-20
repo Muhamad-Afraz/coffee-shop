@@ -126,7 +126,7 @@ const translations = {
       ctaReserve: "Reserve a Table",
       ctaMenu: "View the Menu",
       rating: "★ 4.8 · 250+ reviews",
-      hours: "Open until 2 AM",
+      hours: "Fine coffee made with care",
       scroll: "Scroll",
     },
     marquee: [
@@ -332,7 +332,7 @@ const translations = {
       ctaReserve: "احجز طاولتك",
       ctaMenu: "اكتشف القائمة",
       rating: "★ ٤.٨ · +٢٥٠ تقييم",
-      hours: "مفتوح حتى ٢ صباحاً",
+      hours: "قهوة مختارة بعناية",
       scroll: "استكشف",
     },
     marquee: [

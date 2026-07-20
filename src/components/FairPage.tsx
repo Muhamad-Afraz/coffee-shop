@@ -146,8 +146,8 @@ function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen
       className={[
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
         scrolled
-          ? "bg-ivory/75 backdrop-blur-xl border-b border-border/60"
-          : "bg-transparent",
+          ? "bg-ivory/75 backdrop-blur-xl border-b border-border/60 text-foreground"
+          : "bg-transparent text-white",
       ].join(" ")}
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 md:px-10">
@@ -167,15 +167,15 @@ function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen
               key={href}
               href={href}
               onClick={(e) => { e.preventDefault(); lenis?.scrollTo(href, { duration: scrollDuration(href) }); }}
-              className="group relative text-[0.72rem] tracking-eyebrow text-foreground/70 transition-colors hover:text-foreground"
+              className={`group relative text-[0.72rem] tracking-eyebrow transition-colors ${scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/70 hover:text-white"}`}
             >
               {label}
-              <span className="absolute -bottom-1 start-0 h-px w-0 bg-foreground transition-all duration-500 group-hover:w-full" />
+              <span className={`absolute -bottom-1 start-0 h-px w-0 transition-all duration-500 group-hover:w-full ${scrolled ? "bg-foreground" : "bg-white"}`} />
             </a>
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <LangSwitcher onSwitch={() => setMobileOpen(false)} />
+          <LangSwitcher light={!scrolled} onSwitch={() => setMobileOpen(false)} />
           <a href="#visit" onClick={(e) => { e.preventDefault(); lenis?.scrollTo("#visit", { duration: scrollDuration("#visit") }); }} className="btn-primary">{t("nav.reserve")}</a>
         </div>
         <button
@@ -184,8 +184,8 @@ function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen
           aria-label="Menu"
         >
           <div className="flex flex-col gap-1.5">
-            <span className={`block h-px w-6 bg-foreground transition-transform ${mobileOpen ? "translate-y-[3px] rotate-45" : ""}`} />
-            <span className={`block h-px w-6 bg-foreground transition-transform ${mobileOpen ? "-translate-y-[3px] -rotate-45" : ""}`} />
+            <span className={`block h-px w-6 transition-transform ${scrolled ? "bg-foreground" : "bg-white"} ${mobileOpen ? "translate-y-[3px] rotate-45" : ""}`} />
+            <span className={`block h-px w-6 transition-transform ${scrolled ? "bg-foreground" : "bg-white"} ${mobileOpen ? "-translate-y-[3px] -rotate-45" : ""}`} />
           </div>
         </button>
       </div>
@@ -279,7 +279,7 @@ function Marquee() {
   return (
     <section className="border-y border-border bg-cream py-4 overflow-hidden">
       <div
-        className="marquee-track marquee-fade flex gap-8 whitespace-nowrap"
+        className="marquee-track flex gap-8 whitespace-nowrap"
         style={{ animationDirection: isRtl ? "reverse" : "normal" }}
       >
         {items.map((w, i) => (

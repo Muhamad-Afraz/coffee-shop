@@ -184,10 +184,6 @@
   to { transform: translateX(-50%); }
 }
 @utility marquee-track { animation: marquee 60s linear infinite; }
-@utility marquee-fade {
-  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-}
 
 @keyframes drift {
   0%, 100% { transform: scale(1) translate3d(0,0,0); }
