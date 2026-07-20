@@ -24,7 +24,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const saved = window.localStorage.getItem("fair-lang") as Lang | null;
     return saved === "ar" || saved === "en" ? saved : "en";
   });
-  const [transitioning, setTransitioning] = useState<TransitionState>("idle");
+  const [transitioning, setTransitioning] = useState<TransitionState>("fading-out");
 
   const navigateHome = () => {
     if (transitioning !== "idle") return;
@@ -46,6 +46,23 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     }
   }, [lang]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+    let t2: ReturnType<typeof setTimeout>;
+    const t1 = setTimeout(() => {
+      setTransitioning("fading-in");
+      t2 = setTimeout(() => {
+        setTransitioning("idle");
+      }, 600);
+    }, 450);
+    return () => {
+      clearTimeout(t1);
+      if (t2) clearTimeout(t2);
+    };
+  }, []);
 
   const setLang = (next: Lang) => {
     if (next === lang || transitioning !== "idle") return;
