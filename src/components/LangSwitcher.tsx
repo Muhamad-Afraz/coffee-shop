@@ -1,3 +1,4 @@
+import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Check, Globe } from "lucide-react";
 import { useI18n, type Lang } from "@/lib/i18n";
@@ -7,11 +8,12 @@ const options: { value: Lang; label: string; native: string }[] = [
   { value: "ar", label: "العربية", native: "العربية" },
 ];
 
-export function LangSwitcher({ className = "" }: { className?: string }) {
+export function LangSwitcher({ className = "", onSwitch }: { className?: string; onSwitch?: () => void }) {
   const { lang, setLang, t } = useI18n();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -40,7 +42,7 @@ export function LangSwitcher({ className = "" }: { className?: string }) {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setLang(opt.value)}
+                  onClick={() => { setLang(opt.value); setOpen(false); onSwitch?.(); }}
                   className={[
                     "flex w-full items-center justify-between gap-6 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
                     active

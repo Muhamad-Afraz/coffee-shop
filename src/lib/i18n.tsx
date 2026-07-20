@@ -1,12 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type Lang = "en" | "ar";
+export type TransitionState = "idle" | "fading-out" | "fading-in";
 
 interface I18nContextValue {
   lang: Lang;
   dir: "ltr" | "rtl";
   setLang: (lang: Lang) => void;
   t: (path: string) => any;
+  transitioning: TransitionState;
+  navigateHome: () => void;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -21,6 +24,21 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const saved = window.localStorage.getItem("fair-lang") as Lang | null;
     return saved === "ar" || saved === "en" ? saved : "en";
   });
+  const [transitioning, setTransitioning] = useState<TransitionState>("idle");
+
+  const navigateHome = () => {
+    if (transitioning !== "idle") return;
+    setTransitioning("fading-out");
+    setTimeout(() => {
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      setTransitioning("fading-in");
+      setTimeout(() => {
+        setTransitioning("idle");
+      }, 600);
+    }, 450);
+  };
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -30,14 +48,22 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   const setLang = (next: Lang) => {
-    setLangState(next);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("fair-lang", next);
-    }
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = next;
-      document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
-    }
+    if (next === lang || transitioning !== "idle") return;
+    setTransitioning("fading-out");
+    setTimeout(() => {
+      setLangState(next);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("fair-lang", next);
+      }
+      if (typeof document !== "undefined") {
+        document.documentElement.lang = next;
+        document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
+      }
+      setTransitioning("fading-in");
+      setTimeout(() => {
+        setTransitioning("idle");
+      }, 600);
+    }, 450);
   };
 
   const value: I18nContextValue = {
@@ -45,6 +71,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     dir: lang === "ar" ? "rtl" : "ltr",
     setLang,
     t: (path: string) => getPath(translations[lang], path) ?? path,
+    transitioning,
+    navigateHome,
   };
 
   return (
@@ -90,7 +118,7 @@ const translations = {
       "Slow Craft",
       "Warm Hospitality",
       "Quiet Luxury",
-      "Open Until 2 AM",
+      "Premium",
       "Riyadh",
     ],
     philosophy: {
@@ -112,9 +140,10 @@ const translations = {
       title: "Signature",
       titleItalic: "Coffee",
       body:
-        "A short list, on purpose. Everything we serve, we serve with intention — beans changed with the season, milk textured by hand.",
+        "A carefully crafted collection of specialty coffee, signature drinks, and quality food—made with the finest ingredients and served with uncompromising attention to detail.\n\nSimple. Refined. Memorable.",
       figureCaption: "Signature Espresso",
       figureSub: "— the heart of the house",
+      andMore: "…and more",
       items: [
         {
           name: "Coffee of the Day",
@@ -176,7 +205,7 @@ const translations = {
       title: "The cup",
       titleItalic: "is a letter.",
       body:
-        "Every cup that leaves our bar carries a small handwritten note — sometimes a wish, sometimes a drawing, always a moment. It is our quietest gesture, and our most beloved.",
+        "Every cup made by us carries more than coffee — sometimes a wish, sometimes a memory, always a moment. It is our quietest gesture, and our most beloved.",
       quote:
         '"Someday you will smile while saying it took too long — but this is more than what I prayed for."',
       quoteAttribution: "— found on a FAIR cup",
@@ -212,9 +241,10 @@ const translations = {
       alts: {
         storefront: "FAIR entrance",
         interior: "FAIR interior",
-        espresso: "Espresso",
-        nightWindow: "Night window",
-        cupsGroup: "Illustrated cups",
+        espresso: "FAIR bag",
+        nightWindow: "FAIR dessert and coffee",
+        cupsGroup: "Purple coffee",
+        brandingPaper: "FAIR branding paper",
       },
     },
     stats: {
@@ -222,8 +252,8 @@ const translations = {
       items: [
         ["4.8", "Google rating"],
         ["250+", "Written reviews"],
-        ["2 AM", "Doors close at"],
-        ["12", "Cups on the menu"],
+        ["10+", "Years of barista expertise"],
+        ["100%", "Specialty-grade beans"],
       ],
     },
     visit: {
@@ -294,7 +324,7 @@ const translations = {
       "صناعة بطيئة",
       "ضيافة دافئة",
       "فخامة هادئة",
-      "مفتوح حتى ٢ صباحاً",
+      "فخامة",
       "الرياض",
     ],
     philosophy: {
@@ -319,6 +349,7 @@ const translations = {
         "قائمة قصيرة عن قصد. كل ما نقدمه، نقدمه بقصد — حبوب تتغير مع الموسم، حليب يُحضّر باليد.",
       figureCaption: "إكسبرسو مميز",
       figureSub: "— قلب المكان",
+      andMore: "…وغيرها",
       items: [
         {
           name: "قهوة اليوم",
@@ -380,7 +411,7 @@ const translations = {
       title: "الكوب",
       titleItalic: "رسالة.",
       body:
-        "كل كوب يغادر بارنا يحمل رسالة صغيرة مكتوبة باليد — أحياناً أمنية، وأحياناً رسمة، دائماً لحظة. إنها أهنّتنا وأحبّها.",
+        "كل كوب نصنعه يحمل أكثر من قهوة — أحياناً أمنية، وأحياناً ذكرى، دائماً لحظة. إنها أهدئ هديتنا وأحبّها.",
       quote:
         '"سيأتي يوم تبتسم فيه وأنت تقول إنها طالت — لكن هذا أكثر مما دعوت به."',
       quoteAttribution: "— عُثر عليها على كوب من فير",
@@ -416,9 +447,10 @@ const translations = {
       alts: {
         storefront: "مدخل فير",
         interior: "داخل فير",
-        espresso: "إكسبرسو",
-        nightWindow: "نافذة ليلاً",
-        cupsGroup: "أكواب مرسومة",
+        espresso: "حقيبة فير",
+        nightWindow: "حلويات وقهوة فير",
+        cupsGroup: "قهوة بنفسجية",
+        brandingPaper: "ورق تعريف فير",
       },
     },
     stats: {
@@ -426,8 +458,8 @@ const translations = {
       items: [
         ["٤.٨", "تقييم غوغل"],
         ["+٢٥٠", "تقييم مكتوب"],
-        ["٢ ص", "تُغلق الأبواب عند"],
-        ["١٢", "كوب في القائمة"],
+        ["١٠+", "سنوات خبرة البارستا"],
+        ["١٠٠٪", "حبوب قهوة مختصة"],
       ],
     },
     visit: {
