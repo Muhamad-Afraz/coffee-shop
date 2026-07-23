@@ -430,6 +430,7 @@ function Desserts() {
   const desserts = (content.dessertItems.length > 0 ? content.dessertItems : (t("desserts.items") as Array<{
     name: string;
     note: string;
+    price: string;
     body: string;
   }>));
 
