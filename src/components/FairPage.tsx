@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 
 import { useI18n } from "@/lib/i18n";
+import { useSiteContent } from "@/lib/site-content";
 import { LangSwitcher } from "@/components/LangSwitcher";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { ReviewOverlay } from "@/components/ReviewOverlay";
 
 import storefront from "@/assets/fair-storefront.jpg.asset.json";
 import interior from "@/assets/fair-interior.jpg.asset.json";
@@ -136,7 +139,7 @@ export function FairPage() {
 
 function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen: (v: boolean) => void }) {
   const scrolled = useScrolled(30);
-  const { t, lang, navigateHome } = useI18n();
+  const { t, lang } = useI18n();
   const links = t("nav.links") as [string, string][];
   const isAr = lang === "ar";
   const lenis = useLenis();
@@ -151,16 +154,12 @@ function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen
       ].join(" ")}
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 md:px-10">
-        <a
-          href="#top"
-          onClick={(e) => { e.preventDefault(); navigateHome(); }}
-          className="font-display text-2xl leading-none tracking-tight"
-        >
+        <div className="font-display text-2xl leading-none tracking-tight select-none">
           F<span className="italic">ā</span>ir
           <span className="ms-1 align-super text-[0.55rem] tracking-eyebrow font-sans text-muted-foreground">
             enough
           </span>
-        </a>
+        </div>
         <nav className="hidden items-center gap-10 md:flex">
           {links.map(([label, href]) => (
             <a
@@ -219,6 +218,7 @@ function Nav({ mobileOpen, setMobileOpen }: { mobileOpen: boolean; setMobileOpen
 
 function Hero() {
   const { t, lang } = useI18n();
+  const { content } = useSiteContent();
   const isAr = lang === "ar";
   const lenis = useLenis();
 
@@ -226,7 +226,7 @@ function Hero() {
     <section id="top" className="relative min-h-[100svh] w-full overflow-hidden bg-espresso">
       <div className="absolute inset-0">
         <img
-          src="/16.png"
+          src={content.images.hero}
           alt="FAIR enough coffee shop, evening"
           className="h-full w-full object-cover object-bottom"
         />
@@ -298,6 +298,7 @@ function Marquee() {
 function Philosophy() {
   const { ref, inView } = useInView<HTMLDivElement>();
   const { t, lang } = useI18n();
+  const { content } = useSiteContent();
   const isAr = lang === "ar";
   const values = t("philosophy.values") as [string, string][];
 
@@ -306,11 +307,11 @@ function Philosophy() {
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-16 px-6 md:grid-cols-12 md:px-10">
         <div className="md:col-span-4">
           <p className="tracking-eyebrow text-muted-foreground">{t("philosophy.eyebrow")}</p>
-          <h2 className="mt-6 font-display text-5xl md:text-6xl">
+          <h2 className="mt-6 font-display text-5xl md:text-[5.25rem] leading-[0.95] tracking-tight">
             {t("philosophy.line1")}<br />
             <span className="italic text-muted-foreground">{t("philosophy.line1Italic")}</span>
           </h2>
-          <p className="mt-4 font-display text-5xl md:text-6xl">
+          <p className="mt-4 font-display text-5xl md:text-[5.25rem] leading-[0.95] tracking-tight">
             {t("philosophy.line2")}<br />
             <span className="italic">{t("philosophy.line2Italic")}</span>
           </p>
@@ -332,7 +333,7 @@ function Philosophy() {
                 <figure className="group mt-auto pt-6">
                   <div className="aspect-square overflow-hidden rounded-sm">
                     <img
-                      src={["/17.png", "/18.png", "/5.png"][i]}
+                      src={content.images.philosophyValues[i] || ["/17.png", "/18.png", "/5.png"][i]}
                       alt={title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-105"
@@ -352,30 +353,34 @@ function Philosophy() {
 
 function Coffee() {
   const { t } = useI18n();
-  const coffees = t("coffee.items") as Array<{
+  const { content } = useSiteContent();
+  const coffees = (content.coffeeItems.length > 0 ? content.coffeeItems : (t("coffee.items") as Array<{
     name: string;
     note: string;
     price: string;
     body: string;
-  }>;
+  }>));
 
   return (
     <section id="coffee" className="relative bg-cream py-20 md:py-28 grain">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-          <div>
+        <div className="mt-16 grid grid-cols-1 gap-10 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-5">
             <p className="tracking-eyebrow text-muted-foreground">{t("coffee.eyebrow")}</p>
-            <h2 className="mt-6 font-display text-6xl md:text-7xl">
+            <h2 className="mt-6 font-display text-6xl md:text-[5.25rem]">
               {t("coffee.title")} <span className="italic">{t("coffee.titleItalic")}</span>
             </h2>
           </div>
+          <p className="md:col-span-7 font-serif text-2xl md:text-3xl text-foreground/80 leading-snug text-start">
+            {t("coffee.body").split("\n\n")[0]}
+          </p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-14 md:grid-cols-12">
           <div className="md:col-span-5 md:row-span-2">
             <figure className="group relative overflow-hidden">
               <img
-                src="/4.png"
+                src={content.images.coffee}
                 alt="FAIR signature espresso"
                 loading="lazy"
                 className="aspect-[2/3] w-full object-cover transition-transform duration-[1400ms] group-hover:scale-105"
@@ -388,38 +393,29 @@ function Coffee() {
           </div>
 
           <ul className="md:col-span-7 divide-y divide-border">
-            {coffees.map((c, i) => (
-              <li key={c.name} className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-6 py-7">
-                <span className="tracking-eyebrow text-muted-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0">
-                  <div className="flex items-baseline justify-between gap-6">
-                    <h3 className="font-serif text-3xl md:text-4xl transition-transform duration-500 group-hover:translate-x-1 text-start">
-                      {c.name}
-                    </h3>
-                    <span className="hidden text-sm tracking-eyebrow text-muted-foreground md:inline">
-                      {c.note}
-                    </span>
+              {coffees.map((c, i) => (
+                <li key={c.name} className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-6 py-7">
+                  <span className="tracking-eyebrow text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex items-baseline justify-between gap-6">
+                      <h3 className="font-serif text-3xl md:text-4xl transition-transform duration-500 group-hover:translate-x-1 text-start">
+                        {c.name}
+                      </h3>
+                      <span className="hidden text-sm tracking-eyebrow text-muted-foreground md:inline">
+                        {c.note}
+                      </span>
+                    </div>
+                    <p className="mt-2 max-w-lg text-sm text-foreground/70 text-start">{c.body}</p>
                   </div>
-                  <p className="mt-2 max-w-lg text-sm text-foreground/70 text-start">{c.body}</p>
-                </div>
-                <span className="font-serif text-lg text-foreground/80">{c.price}</span>
+                  <span className="font-serif text-lg text-foreground/80">{c.price}</span>
+                </li>
+              ))}
+              <li className="py-7 text-2xl tracking-eyebrow text-muted-foreground">
+                {t("coffee.andMore")}
               </li>
-            ))}
-            <li className="py-7 text-2xl tracking-eyebrow text-muted-foreground">
-              {t("coffee.andMore")}
-            </li>
-          </ul>
-
-          <div className="md:col-span-7 text-center">
-            <p className="font-cursive text-3xl md:text-4xl text-foreground/80 leading-snug">
-              {t("coffee.body").split("\n\n")[0]}
-            </p>
-            <p className="mt-[0.5px] font-serif italic text-3xl md:text-4xl tracking-wide text-foreground/60">
-              {t("coffee.body").split("\n\n")[1]}
-            </p>
-          </div>
+            </ul>
         </div>
       </div>
     </section>
@@ -430,29 +426,33 @@ function Coffee() {
 
 function Desserts() {
   const { t } = useI18n();
-  const desserts = t("desserts.items") as Array<{
+  const { content } = useSiteContent();
+  const desserts = (content.dessertItems.length > 0 ? content.dessertItems : (t("desserts.items") as Array<{
     name: string;
     note: string;
     body: string;
-  }>;
+  }>));
 
   return (
     <section id="desserts" className="relative bg-background py-28 md:py-36">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-          <div>
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-6">
             <p className="tracking-eyebrow text-muted-foreground">{t("desserts.eyebrow")}</p>
-            <h2 className="mt-6 font-display text-6xl md:text-7xl">
+            <h2 className="mt-6 font-display text-6xl md:text-[5.25rem]">
               {t("desserts.title")} <span className="italic">{t("desserts.titleItalic")}</span>
             </h2>
           </div>
+          <p className="md:col-span-6 font-serif text-4xl leading-snug text-foreground/85 md:text-4xl text-start">
+            {t("desserts.body")}
+          </p>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-10 md:grid-cols-12">
           <figure className="md:col-span-6">
             <div className="overflow-hidden">
               <img
-                src="/13.png"
+                src={content.images.desserts}
                 alt="FAIR pastry selection"
                 loading="lazy"
                 className="aspect-[4/5] w-full object-cover transition-transform duration-[1400ms] hover:scale-105"
@@ -461,25 +461,27 @@ function Desserts() {
           </figure>
 
           <div className="md:col-span-6 flex flex-col justify-start">
-            <p className="font-serif text-4xl leading-snug text-foreground/85 md:text-4xl text-start">
-              {t("desserts.body")}
-            </p>
-
-            <ul className="mt-10 divide-y divide-border">
+            <ul className="divide-y divide-border">
               {desserts.map((d, i) => (
-                <li key={d.name} className="grid grid-cols-[auto_1fr] gap-6 py-6">
-                  <span className="tracking-eyebrow text-muted-foreground pt-2">
+                <li key={d.name} className="group grid grid-cols-[auto_1fr] gap-6 py-7">
+                  <span className="tracking-eyebrow text-muted-foreground">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <div>
-                    <div className="flex items-baseline justify-between gap-4">
-                      <h3 className="font-serif text-3xl text-start">{d.name}</h3>
-                      <span className="text-sm tracking-eyebrow text-muted-foreground">{d.note}</span>
+                  <div className="min-w-0 grid grid-cols-[1fr_auto] gap-x-8">
+                    <div className="min-w-0">
+                      <h3 className="font-serif text-3xl md:text-4xl transition-transform duration-500 group-hover:translate-x-1 text-start">{d.name}</h3>
+                      <p className="mt-2 max-w-lg text-sm text-foreground/70 text-start">{d.body}</p>
                     </div>
-                    <p className="mt-2 text-sm text-foreground/70 text-start">{d.body}</p>
+                    <div className="text-start">
+                      <span className="hidden text-sm tracking-eyebrow text-muted-foreground md:inline">{d.note}</span>
+                      <p className="mt-1 font-serif text-lg text-foreground/80">{d.price}</p>
+                    </div>
                   </div>
                 </li>
               ))}
+              <li className="py-7 text-2xl tracking-eyebrow text-muted-foreground">
+                {t("desserts.andMore")}
+              </li>
             </ul>
           </div>
         </div>
@@ -492,6 +494,7 @@ function Desserts() {
 
 function Signature() {
   const { t, lang } = useI18n();
+  const { content } = useSiteContent();
   const isAr = lang === "ar";
 
   return (
@@ -499,7 +502,7 @@ function Signature() {
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 items-center gap-16 px-6 md:grid-cols-2 md:px-10">
         <div>
           <p className="tracking-eyebrow text-ivory/50">{t("signature.eyebrow")}</p>
-          <h2 className="mt-6 font-display text-5xl md:text-7xl">
+          <h2 className="mt-6 font-display text-5xl md:text-[5.25rem]">
             {t("signature.title")}<br />
             <span className="italic text-ivory/70">{t("signature.titleItalic")}</span>
           </h2>
@@ -514,10 +517,10 @@ function Signature() {
 
         <div className="relative">
           <div className="relative aspect-[4/5] overflow-hidden">
-            <img src="/1.png" alt="Handwritten FAIR cup" loading="lazy" className="h-full w-full object-cover" />
+            <img src={content.images.signatureCup} alt="Handwritten FAIR cup" loading="lazy" className="h-full w-full object-cover" />
           </div>
           <div className="absolute -bottom-10 -start-6 hidden aspect-square w-1/2 overflow-hidden border-8 border-espresso shadow-editorial md:block">
-            <img src="/c6.png" alt="Illustrated FAIR cups" loading="lazy" className="h-full w-full object-cover" />
+            <img src={content.images.signatureCups} alt="Illustrated FAIR cups" loading="lazy" className="h-full w-full object-cover" />
           </div>
         </div>
       </div>
@@ -528,12 +531,18 @@ function Signature() {
 /* ---------- testimonials ---------- */
 
 function Testimonials() {
-  const { t } = useI18n();
-  const reviews = t("testimonials.items") as Array<{
-    text: string;
-    name: string;
-    tag: string;
-  }>;
+  const { t, lang } = useI18n();
+  const isAr = lang === "ar";
+  const [reviews, setReviews] = useState<Array<{ id: string; text: string; name: string; tag: string; rating: number }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/reviews")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setReviews(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <section className="bg-background py-28 md:py-36">
@@ -545,25 +554,53 @@ function Testimonials() {
               {t("testimonials.title")} <span className="italic">{t("testimonials.titleItalic")}</span>
             </h2>
           </div>
-          <p className="hidden text-sm tracking-eyebrow text-muted-foreground md:block">{t("testimonials.rating")}</p>
+          <div className="hidden items-center gap-4 md:flex">
+            <p className="text-sm tracking-eyebrow text-muted-foreground">{t("testimonials.rating")}</p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className={`btn-primary ${isAr ? "font-arabic" : ""}`}>
+                  {t("testimonials.writeReview")}
+                </button>
+              </DialogTrigger>
+              <ReviewOverlay />
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Mobile review button */}
+        <div className="mt-6 md:hidden">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className={`btn-primary ${isAr ? "font-arabic" : ""}`}>
+                {t("testimonials.writeReview")}
+              </button>
+            </DialogTrigger>
+            <ReviewOverlay />
+          </Dialog>
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {reviews.map((r, i) => (
-            <figure
-              key={i}
-              className="group relative flex flex-col justify-between border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-editorial"
-            >
-              <span className="font-display text-6xl leading-none text-gold/80">&ldquo;</span>
-              <blockquote className="mt-4 font-serif text-xl leading-snug text-foreground/90 text-start">
-                {r.text}
-              </blockquote>
-              <figcaption className="mt-8 flex items-center justify-between border-t border-border pt-4 text-sm">
-                <span className="font-serif italic">{r.name}</span>
-                <span className="tracking-eyebrow text-muted-foreground">{r.tag}</span>
-              </figcaption>
-            </figure>
-          ))}
+          {loading ? (
+            <p className="md:col-span-3 py-12 text-center text-muted-foreground">{t("testimonials.loading")}</p>
+          ) : reviews.length === 0 ? (
+            <p className="md:col-span-3 py-12 text-center text-muted-foreground">{t("testimonials.noReviews")}</p>
+          ) : (
+            [...reviews].reverse().slice(0, 6).map((r) => (
+              <figure
+                key={r.id}
+                className="group relative flex flex-col justify-between border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-editorial"
+              >
+                <span className="font-display text-6xl leading-none text-gold/80">&ldquo;</span>
+                <blockquote className="mt-4 font-serif text-xl leading-snug text-foreground/90 text-start">
+                  {r.text}
+                </blockquote>
+                <figcaption className="mt-8 flex items-center justify-between border-t border-border pt-4 text-sm">
+                  <span className="font-serif italic">{r.name}</span>
+                  <span className="tracking-eyebrow text-muted-foreground">{r.tag}</span>
+                </figcaption>
+              </figure>
+            ))
+          )}
         </div>
       </div>
     </section>
@@ -574,11 +611,14 @@ function Testimonials() {
 
 function Gallery() {
   const { t } = useI18n();
+  const { content } = useSiteContent();
   const alts = t("gallery.alts") as Record<string, string>;
+  const defaultGallery = ["/2.png", "/5.png", "/c1.png"];
+  const galleryImages = content.images.gallery;
   const items = [
-    { src: "/2.png", alt: alts.storefront, span: "md:col-span-4 aspect-[3/4]" },
-    { src: "/5.png", alt: alts.interior, span: "md:col-span-5 aspect-[5/4]" },
-    { src: "/c1.png", alt: alts.espresso, span: "md:col-span-3 aspect-[3/4]" },
+    { src: galleryImages[0] || defaultGallery[0], alt: alts.storefront, span: "md:col-span-4 aspect-[3/5] md:aspect-[3/4]" },
+    { src: galleryImages[1] || defaultGallery[1], alt: alts.interior, span: "md:col-span-5 aspect-[3/5] md:aspect-[5/4]" },
+    { src: galleryImages[2] || defaultGallery[2], alt: alts.espresso, span: "md:col-span-3 aspect-[3/5] md:aspect-[3/4]" },
   ];
 
   return (
@@ -587,7 +627,7 @@ function Gallery() {
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
             <p className="tracking-eyebrow text-muted-foreground">{t("gallery.eyebrow")}</p>
-            <h2 className="mt-6 font-display text-6xl md:text-7xl">
+            <h2 className="mt-6 font-display text-6xl md:text-[5.25rem]">
               {t("gallery.title")} <span className="italic">{t("gallery.titleItalic")}</span>
             </h2>
           </div>
@@ -611,37 +651,37 @@ function Gallery() {
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-espresso/40 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
             </figure>
           ))}
-          <figure className="group relative overflow-hidden md:col-span-4 self-start -mt-[33%] aspect-[3/5]">
+          <figure className="group relative overflow-hidden md:col-span-4 aspect-[3/5] md:align-self-start">
             <img
-              src="/14.png"
+              src={galleryImages[3] || "/14.png"}
               alt={alts.brandingPaper}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-espresso/40 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
           </figure>
-          <figure className="group relative overflow-hidden md:col-span-4 self-start -mt-[33%] aspect-[3/5]">
+          <figure className="group relative overflow-hidden md:col-span-4 aspect-[3/5] md:aspect-[1/2] md:align-self-start md:-mt-[33.33%]">
             <img
-              src="/c2.png"
+              src={galleryImages[4] || "/c2.png"}
               alt={alts.nightWindow}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-espresso/40 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
           </figure>
-          <div className="md:col-span-4 self-start -mt-[33%] aspect-[3/5] flex flex-col gap-4 overflow-hidden">
-            <figure className="relative overflow-hidden aspect-[10/11] shrink-0">
+          <div className="md:col-span-4 aspect-[3/5] md:aspect-[1/2] md:align-self-start md:-mt-[33.33%] flex flex-col gap-4 overflow-hidden">
+            <figure className="group relative overflow-hidden aspect-[10/11] shrink-0">
               <img
-                src="/19.png"
+                src={galleryImages[5] || "/19.png"}
                 alt=""
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-espresso/40 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
             </figure>
-            <figure className="relative overflow-hidden flex-1">
+            <figure className="group relative overflow-hidden flex-1">
               <img
-                src="/c7.png"
+                src={galleryImages[6] || "/c7.png"}
                 alt=""
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
@@ -668,7 +708,7 @@ function Stats() {
         <div className="mt-10 grid grid-cols-2 gap-8 border-t border-border pt-10 md:grid-cols-4 md:gap-4">
           {stats.map(([n, l]) => (
             <div key={l} className="border-e border-border/60 pe-6 last:border-e-0">
-              <p className="font-display text-6xl md:text-7xl">{n}</p>
+              <p className="font-display text-6xl md:text-[5.25rem]">{n}</p>
               <p className="mt-3 tracking-eyebrow text-muted-foreground">{l}</p>
             </div>
           ))}
@@ -682,15 +722,16 @@ function Stats() {
 
 function Visit() {
   const { t, lang } = useI18n();
-  const hours = t("visit.hours") as Array<{ label: string; time: string }>;
+  const { content } = useSiteContent();
   const isAr = lang === "ar";
+  const hours = content.hours;
 
   return (
     <section id="visit" className="relative overflow-hidden bg-walnut py-28 text-ivory md:py-36">
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-16 px-6 md:grid-cols-2 md:px-10">
         <div>
           <p className="tracking-eyebrow text-ivory/50">{t("visit.eyebrow")}</p>
-          <h2 className="mt-6 font-display text-6xl md:text-7xl">
+          <h2 className="mt-6 font-display text-6xl md:text-[5.25rem]">
             {t("visit.title")}<br /><span className="italic text-ivory/70">{t("visit.titleItalic")}</span>
           </h2>
           <p className="mt-8 max-w-md font-serif text-xl leading-snug text-ivory/80 text-start">
@@ -698,11 +739,21 @@ function Visit() {
           </p>
 
           <dl className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <dt className="tracking-eyebrow text-ivory/50">{t("visit.addressLabel")}</dt>
-              <dd className="mt-2 font-serif text-lg text-start">
-                {t("visit.address")}
-              </dd>
+            <div className="flex flex-col gap-6">
+              <div>
+                <dt className="tracking-eyebrow text-ivory/50">{t("visit.addressLabel")}</dt>
+                <dd className="mt-2 font-serif text-lg text-start">
+                  {content.address || t("visit.address")}
+                </dd>
+              </div>
+              <div>
+                <dt className="tracking-eyebrow text-ivory/50">{t("visit.reservationsLabel")}</dt>
+                <dd className="mt-2 font-serif text-lg">{content.reservations || t("visit.reservations")}</dd>
+              </div>
+              <div>
+                <dt className="tracking-eyebrow text-ivory/50">{t("visit.parkingLabel")}</dt>
+                <dd className="mt-2 font-serif text-lg text-start">{content.parking || t("visit.parking")}</dd>
+              </div>
             </div>
             <div>
               <dt className="tracking-eyebrow text-ivory/50">{t("visit.hoursLabel")}</dt>
@@ -715,18 +766,10 @@ function Visit() {
                 ))}
               </dd>
             </div>
-            <div>
-              <dt className="tracking-eyebrow text-ivory/50">{t("visit.reservationsLabel")}</dt>
-              <dd className="mt-2 font-serif text-lg">{t("visit.reservations")}</dd>
-            </div>
-            <div>
-              <dt className="tracking-eyebrow text-ivory/50">{t("visit.parkingLabel")}</dt>
-              <dd className="mt-2 font-serif text-lg text-start">{t("visit.parking")}</dd>
-            </div>
           </dl>
 
           <div className="mt-12 flex flex-wrap gap-3">
-            <a href="mailto:reserve@fair-enough.coffee" className="btn-primary" style={{ background: "var(--ivory)", color: "var(--espresso)" }}>
+            <a href="#" onClick={(e) => e.preventDefault()} className="btn-primary" style={{ background: "var(--ivory)", color: "var(--espresso)" }}>
               {t("visit.ctaReserve")}
             </a>
             <a
@@ -742,10 +785,10 @@ function Visit() {
 
         <div className="relative">
           <div className="aspect-[4/5] overflow-hidden">
-            <img src="/c11.png" alt="FAIR entrance in daylight" loading="lazy" className="h-full w-full object-cover object-bottom" />
+            <img src={content.images.visit[0] || "/c11.png"} alt="FAIR entrance in daylight" loading="lazy" className="h-full w-full object-cover object-bottom" />
           </div>
           <div className="absolute -top-6 end-0 hidden aspect-[4/3] w-1/2 overflow-hidden border-8 border-walnut shadow-editorial md:block">
-            <img src="/20.jpg" alt="FAIR interior" loading="lazy" className="h-full w-full object-cover" />
+            <img src={content.images.visit[1] || "/20.jpg"} alt="FAIR interior" loading="lazy" className="h-full w-full object-cover" />
           </div>
         </div>
       </div>
@@ -775,7 +818,7 @@ function Footer() {
 
             <form
               suppressHydrationWarning
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => { e.preventDefault(); window.open("https://mail.google.com/mail/?view=cm&fs=1&to=reserve@fair-enough.coffee", "_blank"); }}
               className="mt-10 flex max-w-sm items-center border-b border-ivory/30 pb-2"
             >
               <input

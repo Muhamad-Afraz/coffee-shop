@@ -1,0 +1,100 @@
+{
+  "hours": [
+    {
+      "label": "Sun — Wed",
+      "time": "6:00 AM — 1:00 AM"
+    },
+    {
+      "label": "Thursday",
+      "time": "6:00 AM — 2:00 AM"
+    },
+    {
+      "label": "Friday",
+      "time": "12:30 PM — 2:00 AM"
+    },
+    {
+      "label": "Saturday",
+      "time": "6:00 AM — 1:00 AM"
+    }
+  ],
+  "address": "Saybawiyyah, Ar Rawdah / Riyadh 13211, Saudi Arabia",
+  "parking": "Street parking",
+  "reservations": "Kindly notify us at least two hours before your arrival",
+  "coffeeItems": [
+    {
+      "name": "Coffee of the Day",
+      "note": "Rotating single origin",
+      "price": "SAR 22",
+      "body": "A daily selection from our roasters — bright, clean, considered."
+    },
+    {
+      "name": "Espresso",
+      "note": "Signature blend",
+      "price": "SAR 18",
+      "body": "Dense, syrupy, quietly floral. The heart of the house."
+    },
+    {
+      "name": "Coconut Coffee",
+      "note": "House specialty",
+      "price": "SAR 28",
+      "body": "Cold-pressed coconut folded into a slow-pulled shot."
+    },
+    {
+      "name": "Specialty Latte",
+      "note": "Whole milk or oat",
+      "price": "SAR 24",
+      "body": "Micro-foam textured to silk. Poured with intention."
+    }
+  ],
+  "dessertItems": [
+    {
+      "name": "Lavender Cake",
+      "note": "Signature",
+      "body": "Layered sponge, lavender cream, a whisper of gold.",
+      "price": "SAR 20"
+    },
+    {
+      "name": "Kozama Cake",
+      "note": "House favorite",
+      "body": "Toasted nuts, honeyed cream, brown butter finish.",
+      "price": "SAR 25"
+    },
+    {
+      "name": "Coffee Cake",
+      "note": "For the purists",
+      "body": "Espresso-soaked crumb with mascarpone.",
+      "price": "SAR 15"
+    },
+    {
+      "name": "Seasonal",
+      "note": "Changing weekly",
+      "body": "Guided by the season. Ask what's new today.",
+      "price": "SAR -"
+    }
+  ],
+  "images": {
+    "hero": "/16.png",
+    "philosophyValues": [
+      "/17.png",
+      "/18.png",
+      "/5.png"
+    ],
+    "coffee": "/4.png",
+    "desserts": "/13.png",
+    "signatureCup": "/1.png",
+    "signatureCups": "/c6.png",
+    "gallery": [
+      "/2.png",
+      "/5.png",
+      "/c1.png",
+      "/14.png",
+      "/c2.png",
+      "/19.png",
+      "/c7.png"
+    ],
+    "visit": [
+      "/c11.png",
+      "/uploads/cd20be25-9704-40c8-87ef-d70474c4f697.jpg"
+    ]
+  }
+}

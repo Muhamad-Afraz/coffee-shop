@@ -71,6 +71,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setLangState(next);
       if (typeof window !== "undefined") {
         window.localStorage.setItem("fair-lang", next);
+        window.scrollTo(0, 0);
       }
       if (typeof document !== "undefined") {
         document.documentElement.lang = next;
@@ -198,24 +199,29 @@ const translations = {
         {
           name: "Lavender Cake",
           note: "Signature",
+          price: "SAR 25",
           body: "Layered sponge, lavender cream, a whisper of gold.",
         },
         {
           name: "Kozama Cake",
           note: "House favorite",
+          price: "SAR 28",
           body: "Toasted nuts, honeyed cream, brown butter finish.",
         },
         {
           name: "Coffee Cake",
           note: "For the purists",
+          price: "SAR 22",
           body: "Espresso-soaked crumb with mascarpone.",
         },
         {
           name: "Seasonal",
           note: "Changing weekly",
+          price: "SAR 24",
           body: "Guided by the season. Ask what's new today.",
         },
       ],
+      andMore: "…and more",
     },
     signature: {
       eyebrow: "04 · A Signature",
@@ -231,24 +237,22 @@ const translations = {
       eyebrow: "05 · In Their Words",
       title: "A room people",
       titleItalic: "write home about.",
-      rating: "★ 4.8 / 5",
-      items: [
-        {
-          text: "The handwritten note on my cup made my whole week. Coffee is beautifully balanced.",
-          name: "Layla A.",
-          tag: "Regular",
-        },
-        {
-          text: "It doesn't feel like a café. It feels like a small, quiet piece of somewhere else.",
-          name: "Mohammed R.",
-          tag: "Google review",
-        },
-        {
-          text: "Every detail — the tray, the cup, the light — everything is considered. Rare in Riyadh.",
-          name: "Nora S.",
-          tag: "Visitor",
-        },
-      ],
+      rating: "ratings",
+      writeReview: "Write a review",
+      overlayTitle: "Review page",
+      name: "Name",
+      review: "Review",
+      ratingLabel: "Rating",
+      formSubmit: "Submit Review",
+      formSuccess: "Thank you for your review!",
+      formRequired: "This field is required",
+      namePlaceholder: "e.g. Sarah M.",
+      reviewPlaceholder: "Tell us about your experience...",
+      formRejected: "Your review couldn't be submitted. Please ensure your review is appropriate and try again.",
+      formError: "Something went wrong. Please try again later.",
+      noReviews: "No reviews yet",
+      loading: "Loading...",
+      items: [],
     },
     gallery: {
       eyebrow: "06 · Gallery",
@@ -281,6 +285,10 @@ const translations = {
         "Whether it is early morning or the quiet hour before close — the door is open, the light is warm, the coffee is ready.",
       addressLabel: "Address",
       address: "Saybawiyyah, Ar Rawdah / Riyadh 13211, Saudi Arabia",
+      reservationsLabel: "Reservations",
+      reservations: "Kindly notify us at least two hours before your arrival",
+      parkingLabel: "Parking",
+      parking: "Street parking",
       hoursLabel: "Hours",
       hours: [
         { label: "Sun — Wed", time: "6:00 AM — 1:00 AM" },
@@ -288,10 +296,6 @@ const translations = {
         { label: "Friday", time: "12:30 PM — 2:00 AM" },
         { label: "Saturday", time: "6:00 AM — 1:00 AM" },
       ],
-      reservationsLabel: "Reservations",
-      reservations: "reserve@fair-enough.coffee",
-      parkingLabel: "Parking",
-      parking: "Street parking, valet after 8 PM",
       ctaReserve: "Reserve a Table",
       ctaDirections: "Get Directions",
     },
@@ -404,24 +408,29 @@ const translations = {
         {
           name: "كيك اللافندر",
           note: "المميز",
+          price: "٢٥ ر.س",
           body: "إسفنجة طبقية، كريمة لافندر، لمسة ذهب.",
         },
         {
           name: "كيك كوزاما",
           note: "المفضل لدينا",
+          price: "٢٨ ر.س",
           body: "مكسرات محمصة، كريمة بالعسل، نكهة الزبدة البنية.",
         },
         {
           name: "كيك القهوة",
           note: "لعشاق النقاء",
+          price: "٢٢ ر.س",
           body: "فتات منقوع بالإكسبرسو مع ماسكاربوني.",
         },
         {
           name: "موسمي",
           note: "يتغير أسبوعياً",
+          price: "٢٤ ر.س",
           body: "يُختار حسب الموسم. اسأل ما هو جديد اليوم.",
         },
       ],
+      andMore: "…وغيرها",
     },
     signature: {
       eyebrow: "٠٤ · بصمتنا",
@@ -437,24 +446,22 @@ const translations = {
       eyebrow: "٠٥ · بكلماتهم",
       title: "مكان",
       titleItalic: "يُروى عنه.",
-      rating: "★ ٤.٨ / ٥",
-      items: [
-        {
-          text: "الرسالة المكتوبة على كوبي أضاءت أسبوعي. القهوة متوازنة بشكل جميل.",
-          name: "ليلى أ.",
-          tag: "زبونة دائمة",
-        },
-        {
-          text: "لا يشعرك كمقهى. يشعرك كقطعة صغيرة وهادئة من مكان آخر.",
-          name: "محمد ر.",
-          tag: "تقييم غوغل",
-        },
-        {
-          text: "كل التفاصيل — الصينية، الكوب، الضوء — كل شيء مدروس. نادر في الرياض.",
-          name: "نورا س.",
-          tag: "زائرة",
-        },
-      ],
+      rating: "التقييمات",
+      writeReview: "اكتب تقييم",
+      overlayTitle: "صفحة التقييمات",
+      name: "الاسم",
+      review: "مراجعة",
+      ratingLabel: "التقييم",
+      formSubmit: "إرسال التقييم",
+      formSuccess: "شكراً لتقييمك!",
+      formRequired: "هذا الحقل مطلوب",
+      namePlaceholder: "مثال: ليلى أ.",
+      reviewPlaceholder: "أخبرنا عن تجربتك...",
+      formRejected: "لا يمكن إرسال تقييمك. يرجى التأكد من أن تقييمك مناسب والمحاولة مرة أخرى.",
+      formError: "حدث خطأ ما. يرجى المحاولة لاحقاً.",
+      noReviews: "لا توجد تقييمات بعد",
+      loading: "جاري التحميل...",
+      items: [],
     },
     gallery: {
       eyebrow: "٠٦ · المعرض",
@@ -487,6 +494,10 @@ const translations = {
         "سواء كان الصباح الباكر أو الساعة الهادئة قبل الإغلاق — الباب مفتوح، الضوء دافئ، والقهوة جاهزة.",
       addressLabel: "العنوان",
       address: "الصيبوية، الروضة / الرياض ١٣٢١١، المملكة العربية السعودية",
+      reservationsLabel: "الحجوزات",
+      reservations: "يرجى إبلاغنا قبل ساعتين من وصولك",
+      parkingLabel: "المواقف",
+      parking: "مواقف شارعية",
       hoursLabel: "المواعيد",
       hours: [
         { label: "الأحد — الأربعاء", time: "٦:٠٠ ص — ١:٠٠ ص" },
@@ -494,10 +505,6 @@ const translations = {
         { label: "الجمعة", time: "١٢:٣٠ ظ — ٢:٠٠ ص" },
         { label: "السبت", time: "٦:٠٠ ص — ١:٠٠ ص" },
       ],
-      reservationsLabel: "الحجوزات",
-      reservations: "reserve@fair-enough.coffee",
-      parkingLabel: "المواقف",
-      parking: "مواقف شارعية، خدمة صف السيارات بعد ٨ مساءً",
       ctaReserve: "احجز طاولتك",
       ctaDirections: "احصل على الاتجاهات",
     },

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Amiri, Great_Vibes } from "next/font/google";
 import { SmoothScrolling } from "@/components/smooth-scrolling";
+import { AuthProvider } from "@/lib/auth-context";
+import { SiteContentProvider } from "@/lib/site-content";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -71,7 +74,12 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${amiri.variable} ${greatVibes.variable}`}>
-        <SmoothScrolling>{children}</SmoothScrolling>
+        <SmoothScrolling>
+          <SiteContentProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </SiteContentProvider>
+        </SmoothScrolling>
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );

@@ -1,0 +1,238 @@
+import { NextResponse } from "next/server";
+import { readFile, writeFile, mkdir } from "fs/promises";
+import { existsSync } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { cookies } from "next/headers";
+import { verifySessionToken } from "@/lib/session";
+
+const REVIEWS_FILE = path.join(process.cwd(), "data", "reviews.json");
+
+const BRAINROT_TERMS = [
+  "skibidi", "gyat", "gyatt", "rizz", "ohio", "fanum", "fanum tax",
+  "sigma", "mewing", "looksmax", "looksmaxing", "grizz",
+  "mog", "mogging", "mogger", "chad", "jelq", "looksmaxxer",
+  "sus", "sussy", "bussin", "delulu", "ick", "npc",
+  "slay", "tea", "ate", "no cap", "fr fr", "bet",
+  "glizzy", "w rizz", "l rizz", "only in ohio",
+  "skibidi toilet", "skibidi dop dop", "dop dop yes yes",
+  "alpha male", "red pill", "black pill", "white pill",
+  "brain rot", "brainrot", "touch grass",
+];
+
+const NUMERIC_MEMES = ["69", "67", "420", "666", "80085", "1337", "42069", "0000", "000", "12345"];
+
+const WORD_TO_DIGIT: Record<string, string> = {
+  zero: "0", oh: "0", o: "0",
+  one: "1", won: "1", wonn: "1",
+  two: "2", too: "2", to: "2",
+  three: "3",
+  four: "4", for: "4",
+  five: "5",
+  six: "6",
+  seven: "7",
+  eight: "8", ate: "8",
+  nine: "9",
+  ten: "10", tin: "10",
+};
+
+function wordsToNumbers(str: string): string {
+  return str.replace(/\b[a-z]+\b/g, (word) => WORD_TO_DIGIT[word] ?? word);
+}
+
+function checkBrainrot(text: string, name: string): { flagged: boolean; reason?: string } {
+  const lowerText = text.toLowerCase();
+  const lowerName = name.toLowerCase();
+
+  for (const term of BRAINROT_TERMS) {
+    if (lowerName.includes(term)) {
+      return { flagged: true, reason: "Name contains inappropriate content" };
+    }
+    if (lowerText.includes(term)) {
+      return { flagged: true, reason: "Review contains inappropriate content" };
+    }
+  }
+
+  const nameClean = lowerName.replace(/[\s\-_.]/g, "");
+  const nameAsNumbers = wordsToNumbers(nameClean).replace(/[^0-9]/g, "");
+  if (NUMERIC_MEMES.some((m) => nameClean === m || nameAsNumbers === m)) {
+    return { flagged: true, reason: "Name is not valid" };
+  }
+
+  const textClean = lowerText.replace(/[\s\-_.]/g, "");
+  const textAsNumbers = wordsToNumbers(textClean).replace(/[^0-9]/g, "");
+  if (NUMERIC_MEMES.some((m) => textClean === m || textAsNumbers === m)) {
+    return { flagged: true, reason: "Review is not valid" };
+  }
+
+  return { flagged: false };
+}
+
+const reviewSchema = z.object({
+  text: z.string().min(1, "Review text is required").max(1000),
+  name: z.string().min(1, "Name is required").max(100),
+  rating: z.number().int().min(1).max(5),
+});
+
+async function ensureFile() {
+  if (!existsSync(REVIEWS_FILE)) {
+    await mkdir(path.dirname(REVIEWS_FILE), { recursive: true });
+    await writeFile(REVIEWS_FILE, "[]", "utf-8");
+  }
+}
+
+async function readReviews() {
+  await ensureFile();
+  const raw = await readFile(REVIEWS_FILE, "utf-8");
+  return JSON.parse(raw);
+}
+
+async function writeReviews(reviews: unknown[]) {
+  await writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
+}
+
+async function moderateContent(text: string, name: string): Promise<{ flagged: boolean; reason?: string }> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    return { flagged: false };
+  }
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content: `You are a content moderation classifier. Analyze the following user review text AND name for inappropriate content. Check for: harassment, hate speech, sexual content, self-harm references, violence, spam, commercial advertising, profanity, slurs, offensive language, brainrot internet slang (e.g. skibidi, gyat, rizz, ohio, fanum tax, sigma, alpha, beta), numeric meme references (e.g. 69, 67, 420 used as jokes or names), and troll or joke reviews with no genuine review content.
+
+The name is: "${name}"
+The review text is: "${text}"
+
+Respond with ONLY a JSON object, no other text:
+- If the content is inappropriate: {"flagged": true, "reason": "<brief reason>"}
+- If the content is appropriate: {"flagged": false}`,
+          },
+          {
+            role: "user",
+            content: `Name: ${name}\nReview: ${text}`,
+          },
+        ],
+        temperature: 0,
+        max_tokens: 100,
+      }),
+    });
+
+    if (!response.ok) {
+      return { flagged: false };
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) {
+      return { flagged: false };
+    }
+
+    const parsed = JSON.parse(content);
+    return {
+      flagged: !!parsed.flagged,
+      reason: parsed.reason || undefined,
+    };
+  } catch {
+    return { flagged: false };
+  }
+}
+
+export async function GET() {
+  try {
+    const reviews = await readReviews();
+    return NextResponse.json(reviews);
+  } catch {
+    return NextResponse.json({ error: "Failed to read reviews" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const parsed = reviewSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
+
+    const brainrot = checkBrainrot(parsed.data.text, parsed.data.name);
+    if (brainrot.flagged) {
+      return NextResponse.json(
+        { error: "rejected", reason: brainrot.reason },
+        { status: 400 },
+      );
+    }
+
+    const moderation = await moderateContent(parsed.data.text, parsed.data.name);
+    if (moderation.flagged) {
+      return NextResponse.json(
+        { error: "rejected", reason: moderation.reason },
+        { status: 400 },
+      );
+    }
+
+    const reviews = await readReviews();
+
+    const newReview = {
+      id: randomUUID(),
+      text: parsed.data.text,
+      name: parsed.data.name,
+      tag: "Visitor",
+      rating: parsed.data.rating,
+      createdAt: new Date().toISOString(),
+    };
+
+    reviews.push(newReview);
+    await writeReviews(reviews);
+
+    return NextResponse.json(newReview, { status: 201 });
+  } catch {
+    return NextResponse.json({ error: "Failed to save review" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get("admin-session")?.value;
+
+    if (!session || !verifySessionToken(session)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Review ID required" }, { status: 400 });
+    }
+
+    const reviews = await readReviews();
+    const filtered = reviews.filter((r: { id: string }) => r.id !== id);
+
+    if (filtered.length === reviews.length) {
+      return NextResponse.json({ error: "Review not found" }, { status: 404 });
+    }
+
+    await writeReviews(filtered);
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: "Failed to delete review" }, { status: 500 });
+  }
+}
