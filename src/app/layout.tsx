@@ -28,6 +28,7 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fair-enoughcoffee.vercel.app"),
   title: "FAIR enough — Specialty Coffee, Riyadh",
   description:
     "A boutique specialty coffee house in Riyadh. Handwritten cups, warm hospitality, quiet luxury — open until 2 AM.",
@@ -37,9 +38,11 @@ export const metadata: Metadata = {
     description:
       "A boutique specialty coffee house in Riyadh. Handwritten cups, warm hospitality, quiet luxury.",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/og-image.png"],
   },
 };
 
