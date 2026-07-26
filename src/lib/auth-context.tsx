@@ -7,7 +7,7 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { firebase } from "@/lib/firebase";
 
 interface AuthContextType {
   user: User | null;
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(firebase.auth, (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
     });
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signInWithGoogle() {
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await signInWithPopup(firebase.auth, firebase.googleProvider);
     const idToken = await result.user.getIdToken();
 
     const res = await fetch("/api/admin/auth/google", {
@@ -50,13 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (!res.ok) {
-      await signOut(auth);
+      await signOut(firebase.auth);
       throw new Error("Server auth failed");
     }
   }
 
   async function logout() {
-    await signOut(auth);
+    await signOut(firebase.auth);
     await fetch("/api/admin/auth", { method: "DELETE" });
   }
 

@@ -22,7 +22,7 @@ function ensureApp(): FirebaseApp {
   return _app;
 }
 
-const firebaseExports = {
+export const firebase = {
   get app(): FirebaseApp {
     return ensureApp();
   },
@@ -35,5 +35,3 @@ const firebaseExports = {
     return _googleProvider;
   },
 };
-
-export const { app, auth, googleProvider } = firebaseExports;
