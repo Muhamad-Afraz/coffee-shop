@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, createContext, useContext, type ReactNode } from "react";
+import { useEffect, useState, useRef, createContext, useContext, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 interface HoursEntry {
   label: string;
@@ -78,11 +79,25 @@ export function useSiteContent() {
 export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<SiteContent>(DEFAULTS);
   const [loading, setLoading] = useState(true);
+  const fetchIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin");
 
   function fetchContent() {
-    fetch("/api/admin/content")
+    if (isAdminRoute) {
+      setLoading(false);
+      return;
+    }
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const id = ++fetchIdRef.current;
+
+    fetch("/api/admin/content", { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        if (id !== fetchIdRef.current) return;
         if (data) {
           setContent({
             hours: data.hours || DEFAULTS.hours,
@@ -95,12 +110,17 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
           });
         }
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (err?.name !== "AbortError") console.error("Failed to fetch content:", err);
+      })
+      .finally(() => {
+        if (id === fetchIdRef.current) setLoading(false);
+      });
   }
 
   useEffect(() => {
     fetchContent();
+    return () => abortRef.current?.abort();
   }, []);
 
   return (

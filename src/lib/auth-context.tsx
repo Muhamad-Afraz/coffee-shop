@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { getCsrfHeaders } from "@/lib/csrf-client";
 
 export type SessionRole = "admin" | "visitor" | null;
 
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function passwordLogin(password: string) {
     const res = await fetch("/api/admin/auth", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getCsrfHeaders() },
       credentials: "same-origin",
       body: JSON.stringify({ password }),
     });
@@ -76,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function visitorLogin() {
     const res = await fetch("/api/admin/auth", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getCsrfHeaders(),
       credentials: "same-origin",
     });
     if (!res.ok) {
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function logout() {
-    await fetch("/api/admin/auth", { method: "DELETE", credentials: "same-origin" });
+    await fetch("/api/admin/auth", { method: "DELETE", headers: getCsrfHeaders(), credentials: "same-origin" });
     setRole(null);
   }
 

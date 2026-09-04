@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCsrfHeaders } from "@/lib/csrf-client";
 
 interface Review {
   id: string;
@@ -40,7 +41,7 @@ export default function AdminReviews() {
     if (!confirm("Are you sure you want to delete this review?")) return;
     setDeleting(id);
     try {
-      const res = await fetch(`/api/reviews?id=${id}`, { method: "DELETE", credentials: "same-origin" });
+      const res = await fetch(`/api/reviews?id=${id}`, { method: "DELETE", headers: getCsrfHeaders(), credentials: "same-origin" });
       if (res.ok) {
         setReviews((prev) => prev.filter((r) => r.id !== id));
       } else {

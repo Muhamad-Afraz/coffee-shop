@@ -1,40 +1,50 @@
 /**
  * Temporary in-memory store for VISITOR (non-permanent) edits.
  *
- * Lives only in the server's memory. Clears automatically whenever the
- * serverless function recycles, the process restarts, or a redeploy happens.
- * Visitor edits NEVER touch the permanent layer (Firebase / JSON files),
- * so the live site is never affected by testing.
+ * Data is keyed by session fingerprint so each visitor gets isolated storage.
+ * Clears automatically when the server restarts. Visitor edits NEVER touch
+ * the permanent layer (Firebase / JSON files).
  */
 
-let content: unknown | null = null;
-let reviews: unknown[] | null = null;
-
-export function getTempContent(): unknown | null {
-  return content;
+interface VisitorStore {
+  content: unknown | null;
+  reviews: unknown[];
 }
 
-export function setTempContent(value: unknown): void {
-  content = value;
+const stores = new Map<string, VisitorStore>();
+
+function getOrCreate(key: string): VisitorStore {
+  let store = stores.get(key);
+  if (!store) {
+    store = { content: null, reviews: [] };
+    stores.set(key, store);
+  }
+  return store;
 }
 
-export function getTempReviews(): unknown[] | null {
-  return reviews;
+export function getTempContent(key: string): unknown | null {
+  return getOrCreate(key).content;
 }
 
-export function addTempReview(review: unknown): void {
-  if (!reviews) reviews = [];
-  reviews.push(review);
+export function setTempContent(key: string, value: unknown): void {
+  getOrCreate(key).content = value;
 }
 
-export function removeTempReview(id: string): boolean {
-  if (!reviews) return false;
-  const before = reviews.length;
-  reviews = reviews.filter((r) => (r as { id: string }).id !== id);
-  return reviews.length !== before;
+export function getTempReviews(key: string): unknown[] {
+  return getOrCreate(key).reviews;
 }
 
-export function clearTempStore(): void {
-  content = null;
-  reviews = null;
+export function addTempReview(key: string, review: unknown): void {
+  getOrCreate(key).reviews.push(review);
+}
+
+export function removeTempReview(key: string, id: string): boolean {
+  const store = getOrCreate(key);
+  const before = store.reviews.length;
+  store.reviews = store.reviews.filter((r) => (r as { id: string }).id !== id);
+  return store.reviews.length !== before;
+}
+
+export function clearVisitorStore(key: string): void {
+  stores.delete(key);
 }

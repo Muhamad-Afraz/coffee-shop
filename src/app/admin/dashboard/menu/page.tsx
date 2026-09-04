@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteContent, type MenuItem } from "@/lib/site-content";
+import { getCsrfHeaders } from "@/lib/csrf-client";
 
 export default function MenuPage() {
   const { content, refresh } = useSiteContent();
@@ -49,7 +50,7 @@ export default function MenuPage() {
     try {
       const res = await fetch("/api/admin/content", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getCsrfHeaders() },
         credentials: "same-origin",
         body: JSON.stringify({ ...content, coffeeItems, dessertItems }),
       });

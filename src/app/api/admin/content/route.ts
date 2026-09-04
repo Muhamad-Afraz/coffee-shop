@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifySessionToken, getSessionRole } from "@/lib/session";
+import { verifySessionToken, getSessionRole, getSessionFingerprint } from "@/lib/session";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase-admin";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { getTempContent, setTempContent } from "@/lib/temp-store";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const CONTENT_FILE = path.join(process.cwd(), "data", "site-content.json");
 const COLLECTION = "settings";
@@ -43,20 +44,19 @@ async function savePermanentContent(content: unknown): Promise<void> {
   await writeFile(CONTENT_FILE, JSON.stringify(content, null, 2), "utf-8");
 }
 
-async function getSessionRoleFromCookies(): Promise<"admin" | "visitor" | null> {
+async function getSessionInfoFromCookies(): Promise<{ role: "admin" | "visitor" | null; fingerprint: string | null }> {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin-session")?.value;
-  if (!session || !verifySessionToken(session)) return null;
-  return getSessionRole(session);
+  if (!session || !verifySessionToken(session)) return { role: null, fingerprint: null };
+  return { role: getSessionRole(session), fingerprint: getSessionFingerprint(session) };
 }
 
 export async function GET() {
   try {
-    const role = await getSessionRoleFromCookies();
+    const { role, fingerprint } = await getSessionInfoFromCookies();
 
-    // A visitor sees their temporary content (falling back to permanent if empty)
-    if (role === "visitor") {
-      const temp = getTempContent() as Record<string, unknown> | null;
+    if (role === "visitor" && fingerprint) {
+      const temp = getTempContent(fingerprint) as Record<string, unknown> | null;
       if (temp) {
         return NextResponse.json(temp);
       }
@@ -70,7 +70,11 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const role = await getSessionRoleFromCookies();
+  if (!await validateCsrfToken(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
+  const { role, fingerprint } = await getSessionInfoFromCookies();
   if (!role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -78,13 +82,11 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>;
 
-    // Visitors only write to the temporary store; never to permanent data.
-    if (role === "visitor") {
-      setTempContent(body);
+    if (role === "visitor" && fingerprint) {
+      setTempContent(fingerprint, body);
       return NextResponse.json({ success: true, temp: true });
     }
 
-    // Admin writes permanently.
     await savePermanentContent(body);
     return NextResponse.json({ success: true });
   } catch {

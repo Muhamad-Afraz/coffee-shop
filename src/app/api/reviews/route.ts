@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { cookies } from "next/headers";
-import { verifySessionToken, getSessionRole } from "@/lib/session";
+import { verifySessionToken, getSessionRole, getSessionFingerprint } from "@/lib/session";
 import { getDb, isFirebaseConfigured } from "@/lib/firebase-admin";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
@@ -12,6 +12,7 @@ import {
   addTempReview,
   removeTempReview,
 } from "@/lib/temp-store";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const REVIEWS_FILE = path.join(process.cwd(), "data", "reviews.json");
 const COLLECTION = "reviews";
@@ -166,11 +167,11 @@ async function getPermanentReviews(): Promise<unknown[]> {
   return JSON.parse(raw);
 }
 
-async function getSessionRoleFromCookies(): Promise<"admin" | "visitor" | null> {
+async function getSessionInfoFromCookies(): Promise<{ role: "admin" | "visitor" | null; fingerprint: string | null }> {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin-session")?.value;
-  if (!session || !verifySessionToken(session)) return null;
-  return getSessionRole(session);
+  if (!session || !verifySessionToken(session)) return { role: null, fingerprint: null };
+  return { role: getSessionRole(session), fingerprint: getSessionFingerprint(session) };
 }
 
 async function addPermanentReview(review: { id: string; text: string; name: string; tag: string; rating: number; createdAt: string }): Promise<void> {
@@ -206,12 +207,11 @@ async function deletePermanentReview(id: string): Promise<boolean> {
 
 export async function GET() {
   try {
-    const role = await getSessionRoleFromCookies();
+    const { role, fingerprint } = await getSessionInfoFromCookies();
 
-    // Visitor sees their temporary reviews (falling back to permanent if none).
-    if (role === "visitor") {
-      const temp = getTempReviews();
-      if (temp) return NextResponse.json(temp);
+    if (role === "visitor" && fingerprint) {
+      const temp = getTempReviews(fingerprint);
+      if (temp.length > 0) return NextResponse.json(temp);
     }
 
     const reviews = await getPermanentReviews();
@@ -222,8 +222,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!await validateCsrfToken(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
   try {
-    const role = await getSessionRoleFromCookies();
+    const { role, fingerprint } = await getSessionInfoFromCookies();
     const body = await request.json();
     const parsed = reviewSchema.safeParse(body);
 
@@ -259,9 +263,8 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // A visitor session writes reviews to the temp store only.
-    if (role === "visitor") {
-      addTempReview(newReview);
+    if (role === "visitor" && fingerprint) {
+      addTempReview(fingerprint, newReview);
       return NextResponse.json(newReview, { status: 201 });
     }
 
@@ -274,8 +277,12 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (!await validateCsrfToken(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
   try {
-    const role = await getSessionRoleFromCookies();
+    const { role, fingerprint } = await getSessionInfoFromCookies();
     if (!role) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -287,9 +294,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Review ID required" }, { status: 400 });
     }
 
-    // Visitor can only delete from their temporary reviews.
-    if (role === "visitor") {
-      const deleted = removeTempReview(id);
+    if (role === "visitor" && fingerprint) {
+      const deleted = removeTempReview(fingerprint, id);
       if (!deleted) {
         return NextResponse.json({ error: "Review not found" }, { status: 404 });
       }

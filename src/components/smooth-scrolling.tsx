@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactLenis, useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
 import { useLayoutEffect, type ReactNode } from "react";
 
 function ScrollToTop() {
@@ -18,6 +19,13 @@ function ScrollToTop() {
 }
 
 export function SmoothScrolling({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+
   return (
     <ReactLenis root options={{ lerp: 0.1, duration: 1.2, smoothWheel: true }}>
       <ScrollToTop />

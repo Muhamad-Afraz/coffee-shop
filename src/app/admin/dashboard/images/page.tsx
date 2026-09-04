@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Upload, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteContent, type SiteImages } from "@/lib/site-content";
+import { getCsrfHeaders } from "@/lib/csrf-client";
 
 interface ImageSlotProps {
   label: string;
@@ -27,7 +28,7 @@ function ImageSlot({ label, currentSrc, onChange }: ImageSlotProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData, credentials: "same-origin" });
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData, headers: getCsrfHeaders(), credentials: "same-origin" });
       if (res.ok) {
         const data = await res.json();
         setPreview(data.path);
@@ -99,7 +100,7 @@ function GalleryImageSlot({ label, index, currentSrc, onChange, onRemove }: Gall
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData, credentials: "same-origin" });
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData, headers: getCsrfHeaders(), credentials: "same-origin" });
       if (res.ok) {
         const data = await res.json();
         setPreview(data.path);
@@ -205,7 +206,7 @@ export default function ImagesPage() {
     try {
       const res = await fetch("/api/admin/content", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getCsrfHeaders() },
         credentials: "same-origin",
         body: JSON.stringify({ ...content, images }),
       });

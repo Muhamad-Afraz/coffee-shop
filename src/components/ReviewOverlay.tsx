@@ -8,6 +8,7 @@ import { Star } from "lucide-react";
 import { toast } from "sonner";
 
 import { useI18n } from "@/lib/i18n";
+import { getCsrfHeaders } from "@/lib/csrf-client";
 import {
   DialogContent,
   DialogHeader,
@@ -81,7 +82,8 @@ export function ReviewOverlay() {
     try {
       const res = await fetch("/api/reviews", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getCsrfHeaders() },
+        credentials: "same-origin",
         body: JSON.stringify(data),
       });
 

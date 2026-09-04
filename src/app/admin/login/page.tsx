@@ -18,7 +18,6 @@ function AdminLoginForm() {
 
   async function go() {
     router.push(from);
-    router.refresh();
   }
 
   async function handleVisitor(e: React.MouseEvent) {

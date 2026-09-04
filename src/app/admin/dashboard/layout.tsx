@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
@@ -19,10 +19,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { logout, isVisitor, isAdmin, loading } = useAuth();
 
+  useEffect(() => {
+    if (!loading && !isAdmin && !isVisitor) {
+      router.replace("/admin/login");
+    }
+  }, [loading, isAdmin, isVisitor, router]);
+
   async function handleLogout() {
     await logout();
-    router.push("/admin/login");
-    router.refresh();
+    router.replace("/admin/login");
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-background flex items-center justify-center min-h-screen">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-foreground" />
+      </div>
+    );
+  }
+
+  if (!isAdmin && !isVisitor) {
+    return null;
   }
 
   return (
@@ -33,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="italic text-muted-foreground"> House</span>
         </Link>
         <p className="mt-1 text-xs tracking-eyebrow text-muted-foreground">
-          {isAdmin ? "Admin" : isVisitor ? "Visitor Preview" : "Editor"}
+          {isAdmin ? "Admin" : "Visitor Preview"}
         </p>
         {isVisitor && (
           <p className="mt-2 text-xs text-amber-600 bg-amber-50 rounded-lg px-2 py-1">

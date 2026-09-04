@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createSessionToken, SESSION_MAX_AGE } from "@/lib/session";
-import { clearTempStore } from "@/lib/temp-store";
+import { createSessionToken, getSessionRole, verifySessionToken, SESSION_MAX_AGE } from "@/lib/session";
+import { clearVisitorStore } from "@/lib/temp-store";
+import { getSessionFingerprint, timingSafeStringCompare } from "@/lib/session";
+import { validateCsrfToken } from "@/lib/csrf";
 
 async function setSessionCookie(role: "admin" | "visitor") {
   const token = createSessionToken(role);
@@ -15,12 +17,6 @@ async function setSessionCookie(role: "admin" | "visitor") {
   });
 }
 
-async function clearSession() {
-  clearTempStore();
-  const cookieStore = await cookies();
-  cookieStore.delete("admin-session");
-}
-
 export async function POST(request: Request) {
   try {
     let password: string | undefined;
@@ -32,7 +28,6 @@ export async function POST(request: Request) {
     }
 
     if (!password) {
-      // Passwordless visitor login
       await setSessionCookie("visitor");
       return NextResponse.json({ success: true, role: "visitor" });
     }
@@ -42,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Admin not configured" }, { status: 500 });
     }
 
-    if (password !== adminPassword) {
+    if (!timingSafeStringCompare(password, adminPassword)) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
@@ -53,7 +48,22 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
-  await clearSession();
+export async function DELETE(request: Request) {
+  if (!await validateCsrfToken(request)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
+
+  const cookieStore = await cookies();
+  const session = cookieStore.get("admin-session")?.value;
+
+  if (session && verifySessionToken(session)) {
+    const role = getSessionRole(session);
+    if (role === "visitor") {
+      const fingerprint = getSessionFingerprint(session);
+      clearVisitorStore(fingerprint);
+    }
+  }
+
+  cookieStore.delete("admin-session");
   return NextResponse.json({ success: true });
 }
