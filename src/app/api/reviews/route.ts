@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { cookies } from "next/headers";
+import { verifySessionToken, getSessionRole } from "@/lib/session";
+import { getDb, isFirebaseConfigured } from "@/lib/firebase-admin";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
-import { z } from "zod";
-import { cookies } from "next/headers";
-import { verifySessionToken } from "@/lib/session";
+import {
+  getTempReviews,
+  addTempReview,
+  removeTempReview,
+} from "@/lib/temp-store";
 
 const REVIEWS_FILE = path.join(process.cwd(), "data", "reviews.json");
+const COLLECTION = "reviews";
 
 const BRAINROT_TERMS = [
   "skibidi", "gyat", "gyatt", "rizz", "ohio", "fanum", "fanum tax",
@@ -82,16 +89,6 @@ async function ensureFile() {
   }
 }
 
-async function readReviews() {
-  await ensureFile();
-  const raw = await readFile(REVIEWS_FILE, "utf-8");
-  return JSON.parse(raw);
-}
-
-async function writeReviews(reviews: unknown[]) {
-  await writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
-}
-
 async function moderateContent(text: string, name: string): Promise<{ flagged: boolean; reason?: string }> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -150,9 +147,74 @@ Respond with ONLY a JSON object, no other text:
   }
 }
 
+async function getPermanentReviews(): Promise<unknown[]> {
+  if (isFirebaseConfigured()) {
+    const db = getDb();
+    const snapshot = await db
+      .collection(COLLECTION)
+      .orderBy("createdAt", "desc")
+      .get();
+    const reviews: unknown[] = [];
+    snapshot.forEach((doc) => {
+      reviews.push(doc.data());
+    });
+    return reviews;
+  }
+
+  await ensureFile();
+  const raw = await readFile(REVIEWS_FILE, "utf-8");
+  return JSON.parse(raw);
+}
+
+async function getSessionRoleFromCookies(): Promise<"admin" | "visitor" | null> {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("admin-session")?.value;
+  if (!session || !verifySessionToken(session)) return null;
+  return getSessionRole(session);
+}
+
+async function addPermanentReview(review: { id: string; text: string; name: string; tag: string; rating: number; createdAt: string }): Promise<void> {
+  if (isFirebaseConfigured()) {
+    const db = getDb();
+    await db.collection(COLLECTION).doc(review.id).set(review);
+    return;
+  }
+
+  await ensureFile();
+  const reviews = await getPermanentReviews();
+  reviews.push(review);
+  await writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
+}
+
+async function deletePermanentReview(id: string): Promise<boolean> {
+  if (isFirebaseConfigured()) {
+    const db = getDb();
+    const docRef = db.collection(COLLECTION).doc(id);
+    const snap = await docRef.get();
+    if (!snap.exists) return false;
+    await docRef.delete();
+    return true;
+  }
+
+  await ensureFile();
+  const reviews = await getPermanentReviews();
+  const filtered = reviews.filter((r) => (r as { id: string }).id !== id);
+  if (filtered.length === reviews.length) return false;
+  await writeFile(REVIEWS_FILE, JSON.stringify(filtered, null, 2), "utf-8");
+  return true;
+}
+
 export async function GET() {
   try {
-    const reviews = await readReviews();
+    const role = await getSessionRoleFromCookies();
+
+    // Visitor sees their temporary reviews (falling back to permanent if none).
+    if (role === "visitor") {
+      const temp = getTempReviews();
+      if (temp) return NextResponse.json(temp);
+    }
+
+    const reviews = await getPermanentReviews();
     return NextResponse.json(reviews);
   } catch {
     return NextResponse.json({ error: "Failed to read reviews" }, { status: 500 });
@@ -161,6 +223,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const role = await getSessionRoleFromCookies();
     const body = await request.json();
     const parsed = reviewSchema.safeParse(body);
 
@@ -187,8 +250,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const reviews = await readReviews();
-
     const newReview = {
       id: randomUUID(),
       text: parsed.data.text,
@@ -198,8 +259,13 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    reviews.push(newReview);
-    await writeReviews(reviews);
+    // A visitor session writes reviews to the temp store only.
+    if (role === "visitor") {
+      addTempReview(newReview);
+      return NextResponse.json(newReview, { status: 201 });
+    }
+
+    await addPermanentReview(newReview);
 
     return NextResponse.json(newReview, { status: 201 });
   } catch {
@@ -209,10 +275,8 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin-session")?.value;
-
-    if (!session || !verifySessionToken(session)) {
+    const role = await getSessionRoleFromCookies();
+    if (!role) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -223,14 +287,21 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Review ID required" }, { status: 400 });
     }
 
-    const reviews = await readReviews();
-    const filtered = reviews.filter((r: { id: string }) => r.id !== id);
+    // Visitor can only delete from their temporary reviews.
+    if (role === "visitor") {
+      const deleted = removeTempReview(id);
+      if (!deleted) {
+        return NextResponse.json({ error: "Review not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true });
+    }
 
-    if (filtered.length === reviews.length) {
+    const deleted = await deletePermanentReview(id);
+
+    if (!deleted) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
-    await writeReviews(filtered);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete review" }, { status: 500 });

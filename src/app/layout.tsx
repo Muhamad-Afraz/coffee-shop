@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   description:
     "A boutique specialty coffee house in Riyadh. Handwritten cups, warm hospitality, quiet luxury — open until 2 AM.",
   authors: [{ name: "Coffee House" }],
+  icons: {
+    icon: "/favicon.svg?v=6",
+  },
   openGraph: {
     title: "Coffee House — Specialty Coffee, Riyadh",
     description:
@@ -49,6 +52,10 @@ export const metadata: Metadata = {
 const langInitScript = `
 (function() {
   try {
+    if (window.history && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
     var lang = localStorage.getItem('app-lang');
     if (lang === 'ar' || lang === 'en') {
       document.documentElement.lang = lang;

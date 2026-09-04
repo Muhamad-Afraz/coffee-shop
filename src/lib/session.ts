@@ -8,8 +8,11 @@ function getSessionSecret(): string {
 
 const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-export function createSessionToken(): string {
+export type SessionRole = "admin" | "visitor";
+
+export function createSessionToken(role: SessionRole = "visitor"): string {
   const payload = JSON.stringify({
+    role,
     iat: Date.now(),
     exp: Date.now() + SESSION_MAX_AGE * 1000,
   });
@@ -44,6 +47,21 @@ export function verifySessionToken(token: string): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+export function getSessionRole(token: string): SessionRole | null {
+  try {
+    const decoded = Buffer.from(token, "base64").toString("utf-8");
+    const lastColon = decoded.lastIndexOf(":");
+    if (lastColon === -1) return null;
+    const payload = decoded.slice(0, lastColon);
+    const data = JSON.parse(payload);
+    if (data.exp < Date.now()) return null;
+    if (data.role === "admin" || data.role === "visitor") return data.role;
+    return null;
+  } catch {
+    return null;
   }
 }
 

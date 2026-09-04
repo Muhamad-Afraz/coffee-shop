@@ -1,25 +1,26 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  type User,
-} from "firebase/auth";
-import { firebase } from "@/lib/firebase";
+
+export type SessionRole = "admin" | "visitor" | null;
 
 interface AuthContextType {
-  user: User | null;
+  role: SessionRole;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  isVisitor: boolean;
+  isAdmin: boolean;
+  passwordLogin: (password: string) => Promise<void>;
+  visitorLogin: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
+  role: null,
   loading: true,
-  signInWithGoogle: async () => {},
+  isVisitor: false,
+  isAdmin: false,
+  passwordLogin: async () => {},
+  visitorLogin: async () => {},
   logout: async () => {},
 });
 
@@ -28,40 +29,88 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<SessionRole>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebase.auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-    return unsubscribe;
+    async function loadSession() {
+      try {
+        const res = await fetch("/api/admin/session", { credentials: "same-origin" });
+        if (res.ok) {
+          const data = await res.json();
+          setRole(data.authenticated ? data.role : null);
+        } else {
+          setRole(null);
+        }
+      } catch {
+        setRole(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSession();
   }, []);
 
-  async function signInWithGoogle() {
-    const result = await signInWithPopup(firebase.auth, firebase.googleProvider);
-    const idToken = await result.user.getIdToken();
-
-    const res = await fetch("/api/admin/auth/google", {
+  async function passwordLogin(password: string) {
+    const res = await fetch("/api/admin/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
+      credentials: "same-origin",
+      body: JSON.stringify({ password }),
     });
-
     if (!res.ok) {
-      await signOut(firebase.auth);
-      throw new Error("Server auth failed");
+      let msg = "Login failed";
+      try {
+        const data = await res.json();
+        msg = data.error || msg;
+      } catch {
+        // ignore
+      }
+      throw new Error(msg);
     }
+    const data = await res.json();
+    setRole(data.role || "admin");
+    setLoading(false);
+  }
+
+  async function visitorLogin() {
+    const res = await fetch("/api/admin/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+    });
+    if (!res.ok) {
+      let msg = "Login failed";
+      try {
+        const data = await res.json();
+        msg = data.error || msg;
+      } catch {
+        // ignore
+      }
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    setRole(data.role || "visitor");
+    setLoading(false);
   }
 
   async function logout() {
-    await signOut(firebase.auth);
-    await fetch("/api/admin/auth", { method: "DELETE" });
+    await fetch("/api/admin/auth", { method: "DELETE", credentials: "same-origin" });
+    setRole(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+    <AuthContext.Provider
+      value={{
+        role,
+        loading,
+        isVisitor: role === "visitor",
+        isAdmin: role === "admin",
+        passwordLogin,
+        visitorLogin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

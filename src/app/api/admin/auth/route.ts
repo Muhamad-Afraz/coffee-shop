@@ -1,14 +1,40 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createSessionToken, SESSION_MAX_AGE } from "@/lib/session";
+import { clearTempStore } from "@/lib/temp-store";
+
+async function setSessionCookie(role: "admin" | "visitor") {
+  const token = createSessionToken(role);
+  const cookieStore = await cookies();
+  cookieStore.set("admin-session", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: SESSION_MAX_AGE,
+    path: "/",
+  });
+}
+
+async function clearSession() {
+  clearTempStore();
+  const cookieStore = await cookies();
+  cookieStore.delete("admin-session");
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { password } = body;
+    let password: string | undefined;
+    try {
+      const body = await request.json();
+      password = body?.password;
+    } catch {
+      // Missing/empty body → treated as a passwordless visitor login
+    }
 
     if (!password) {
-      return NextResponse.json({ error: "Password required" }, { status: 400 });
+      // Passwordless visitor login
+      await setSessionCookie("visitor");
+      return NextResponse.json({ success: true, role: "visitor" });
     }
 
     const adminPassword = process.env.ADMIN_PASSWORD;
@@ -20,24 +46,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    const token = createSessionToken();
-    const cookieStore = await cookies();
-    cookieStore.set("admin-session", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: SESSION_MAX_AGE,
-      path: "/",
-    });
-
-    return NextResponse.json({ success: true });
+    await setSessionCookie("admin");
+    return NextResponse.json({ success: true, role: "admin" });
   } catch {
     return NextResponse.json({ error: "Auth failed" }, { status: 500 });
   }
 }
 
 export async function DELETE() {
-  const cookieStore = await cookies();
-  cookieStore.delete("admin-session");
+  await clearSession();
   return NextResponse.json({ success: true });
 }

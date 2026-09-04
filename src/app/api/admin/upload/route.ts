@@ -4,7 +4,8 @@ import { existsSync } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
-import { verifySessionToken } from "@/lib/session";
+import { verifySessionToken, getSessionRole } from "@/lib/session";
+import { getStorageClient, isFirebaseConfigured } from "@/lib/firebase-admin";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
@@ -35,15 +36,35 @@ const ALLOWED_EXTS = [
   "heif",
 ];
 
-async function isAuthenticated(): Promise<boolean> {
+async function getRole(): Promise<"admin" | "visitor" | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get("admin-session")?.value;
-  if (!session) return false;
-  return verifySessionToken(session);
+  if (!session || !verifySessionToken(session)) return null;
+  return getSessionRole(session);
+}
+
+async function uploadToCloud(bytes: Buffer, filename: string, contentType: string): Promise<string> {
+  const storage = getStorageClient();
+  const bucket = storage.bucket();
+  const file = bucket.file(filename);
+
+  await file.save(bytes, {
+    contentType,
+    public: true,
+    metadata: {
+      contentType,
+    },
+  });
+
+  // Make public
+  await file.makePublic();
+
+  return `https://storage.googleapis.com/${bucket.name}/${filename}`;
 }
 
 export async function POST(request: Request) {
-  if (!(await isAuthenticated())) {
+  const role = await getRole();
+  if (!role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -78,16 +99,31 @@ export async function POST(request: Request) {
       );
     }
 
+    const safeExt = ALLOWED_EXTS.includes(ext) ? ext : "png";
+    const contentType = file.type || `image/${safeExt}`;
+    const bytes = Buffer.from(await file.arrayBuffer());
+
+    // Visitors: keep the image temporary as an inline data URL. It never
+    // touches Firebase or the filesystem and dies on server restart.
+    if (role === "visitor") {
+      const dataUrl = `data:${contentType};base64,${bytes.toString("base64")}`;
+      return NextResponse.json({ path: dataUrl, url: dataUrl, temp: true });
+    }
+
+    const filename = `${randomUUID()}.${safeExt}`;
+
+    // Admin: if Firebase is configured, upload to Storage (permanent).
+    if (isFirebaseConfigured()) {
+      const url = await uploadToCloud(bytes, filename, contentType);
+      return NextResponse.json({ path: url, url });
+    }
+
+    // Fallback: write to local filesystem (non-persistent on serverless).
     if (!existsSync(UPLOAD_DIR)) {
       await mkdir(UPLOAD_DIR, { recursive: true });
     }
-
-    const safeExt = ALLOWED_EXTS.includes(ext) ? ext : "png";
-    const filename = `${randomUUID()}.${safeExt}`;
     const filepath = path.join(UPLOAD_DIR, filename);
-
-    const bytes = await file.arrayBuffer();
-    await writeFile(filepath, Buffer.from(bytes));
+    await writeFile(filepath, bytes);
 
     return NextResponse.json({ path: `/uploads/${filename}` });
   } catch (err) {

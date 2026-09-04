@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Overview", exact: true },
@@ -16,9 +17,10 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout, isVisitor, isAdmin, loading } = useAuth();
 
   async function handleLogout() {
-    await fetch("/api/admin/auth", { method: "DELETE" });
+    await logout();
     router.push("/admin/login");
     router.refresh();
   }
@@ -30,7 +32,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           Coffee
           <span className="italic text-muted-foreground"> House</span>
         </Link>
-        <p className="mt-1 text-xs tracking-eyebrow text-muted-foreground">Admin</p>
+        <p className="mt-1 text-xs tracking-eyebrow text-muted-foreground">
+          {isAdmin ? "Admin" : isVisitor ? "Visitor Preview" : "Editor"}
+        </p>
+        {isVisitor && (
+          <p className="mt-2 text-xs text-amber-600 bg-amber-50 rounded-lg px-2 py-1">
+            Temporary — changes reset on reload/server restart.
+          </p>
+        )}
 
         <nav className="mt-8 flex-1 space-y-1">
           {navItems.map((item) => {

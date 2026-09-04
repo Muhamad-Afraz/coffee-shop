@@ -124,7 +124,7 @@ export default function MenuPage() {
             </div>
           ))}
           {coffeeItems.length === 0 && (
-            <p className="text-sm text-muted-foreground py-4 text-center">No coffee items. Click "Add Item" to create one.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">No coffee items. Click &ldquo;Add Item&rdquo; to create one.</p>
           )}
         </div>
       </section>
@@ -174,7 +174,7 @@ export default function MenuPage() {
             </div>
           ))}
           {dessertItems.length === 0 && (
-            <p className="text-sm text-muted-foreground py-4 text-center">No dessert items. Click "Add Item" to create one.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">No dessert items. Click &ldquo;Add Item&rdquo; to create one.</p>
           )}
         </div>
       </section>

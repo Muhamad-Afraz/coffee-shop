@@ -48,7 +48,7 @@ const DEFAULTS: SiteContent = {
   coffeeItems: [],
   dessertItems: [],
   images: {
-    hero: "/16.png",
+    hero: "/uploads/5b81f50c-b35f-463b-862f-c9e5a049faf9.png",
     philosophyValues: ["/17.png", "/18.png", "/5.png"],
     coffee: "/4.png",
     desserts: "/13.png",
