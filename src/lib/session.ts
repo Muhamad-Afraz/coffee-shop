@@ -8,7 +8,7 @@ function getSessionSecret(): string {
 
 const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours
 
-export type SessionRole = "admin" | "visitor";
+type SessionRole = "admin" | "visitor";
 
 export function createSessionToken(role: SessionRole = "visitor"): string {
   const payload = JSON.stringify({

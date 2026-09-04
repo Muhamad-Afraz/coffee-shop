@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Coffee, Cake, Clock, Image, Star } from "lucide-react";
+import { Coffee, Clock, Image, Star } from "lucide-react";
 import { useSiteContent } from "@/lib/site-content";
 
 const cards = [

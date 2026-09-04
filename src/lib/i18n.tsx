@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type Lang = "en" | "ar";
-export type TransitionState = "idle" | "fading-out" | "fading-in";
+type TransitionState = "idle" | "fading-out" | "fading-in";
 
 interface I18nContextValue {
   lang: Lang;

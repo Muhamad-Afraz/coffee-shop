@@ -7,13 +7,6 @@ import { LangSwitcher } from "@/components/LangSwitcher";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { ReviewOverlay } from "@/components/ReviewOverlay";
 
-import storefront from "@/assets/coffee-storefront.jpg.asset.json";
-import interior from "@/assets/coffee-interior.jpg.asset.json";
-import espresso from "@/assets/coffee-espresso.jpg.asset.json";
-import cupsGroup from "@/assets/coffee-cups-group.jpg.asset.json";
-import storefrontNight from "@/assets/coffee-storefront-night.jpg.asset.json";
-import nightWindow from "@/assets/coffee-night-window.jpg.asset.json";
-
 
 /* ---------- small utilities ---------- */
 
