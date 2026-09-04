@@ -38,6 +38,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid Google token" }, { status: 401 });
     }
 
+    const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+    if (allowedEmails.length > 0 && !allowedEmails.includes(googleUser.email)) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
     const token = createSessionToken();
     const cookieStore = await cookies();
     cookieStore.set("admin-session", token, {

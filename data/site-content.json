@@ -17,7 +17,7 @@
       "time": "6:00 AM — 1:00 AM"
     }
   ],
-  "address": "Saybawiyyah, Ar Rawdah / Riyadh 13211, Saudi Arabia",
+  "address": "Riyadh, Saudi Arabia",
   "parking": "Street parking",
   "reservations": "Kindly notify us at least two hours before your arrival",
   "coffeeItems": [
@@ -73,28 +73,28 @@
     }
   ],
   "images": {
-    "hero": "/16.png",
+    "hero": "/uploads/7df53158-6277-4433-b6cc-4feaba31a6b7.jpg",
     "philosophyValues": [
-      "/17.png",
-      "/18.png",
-      "/5.png"
+      "/uploads/8dcaa4cc-8109-4e40-8935-2839bc9e2e58.avif",
+      "/uploads/3f1883ea-52ae-4280-9865-a1631e8b7210.jpg",
+      "/uploads/82a24f26-d728-40b3-89b2-e89a93a23035.jpg"
     ],
-    "coffee": "/4.png",
-    "desserts": "/13.png",
-    "signatureCup": "/1.png",
-    "signatureCups": "/c6.png",
+    "coffee": "/uploads/7e73f152-166f-4f08-b45b-30fdc14eda9f.jpeg",
+    "desserts": "/uploads/77e3aa47-33f1-4c3f-86cf-ef188df42594.webp",
+    "signatureCup": "/uploads/fac130de-5fa4-4b55-b753-07c3df18e3f8.jpg",
+    "signatureCups": "/uploads/62f2d935-f760-444c-beef-bd44cfa4fdf1.avif",
     "gallery": [
-      "/2.png",
-      "/5.png",
-      "/c1.png",
-      "/14.png",
-      "/c2.png",
-      "/19.png",
-      "/c7.png"
+      "/uploads/243a1b3c-2a01-450d-8af6-d2fde5417e7b.jpg",
+      "/uploads/416625cd-a641-4a8b-93bb-6d8e54a6ee03.jpg",
+      "/uploads/7cfb725c-3ab1-4b77-8bfe-3caafb0b8f11.avif",
+      "/uploads/696898ab-4cf2-4422-b138-06eed4639b0f.jpg",
+      "/uploads/6b50443b-a8cb-47e3-b03d-9e423efb89f6.avif",
+      "/uploads/a5879f04-3601-482b-b052-1a1456fa9ca0.jpg",
+      "/uploads/eecf9f85-0927-4d70-a80d-16040adffcda.jpg"
     ],
     "visit": [
-      "/c11.png",
-      "/uploads/cd20be25-9704-40c8-87ef-d70474c4f697.jpg"
+      "/uploads/5b81f50c-b35f-463b-862f-c9e5a049faf9.png",
+      "/uploads/0e87dfc1-28ee-4bea-8fe8-a3c8818eecd8.jpg"
     ]
   }
 }

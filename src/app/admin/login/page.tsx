@@ -62,8 +62,8 @@ function AdminLoginForm() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <p className="font-display text-4xl">
-            F<span className="italic">ā</span>ir
-            <span className="italic text-muted-foreground"> enough</span>
+            Coffee
+            <span className="italic text-muted-foreground"> House</span>
           </p>
           <p className="mt-4 tracking-eyebrow text-muted-foreground">Admin Access</p>
         </div>

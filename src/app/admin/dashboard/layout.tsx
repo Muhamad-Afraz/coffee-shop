@@ -27,8 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="bg-background flex">
       <aside className="w-60 shrink-0 border-r border-border bg-card p-6 flex flex-col sticky top-0 h-screen">
         <Link href="/admin/dashboard" className="font-display text-xl">
-          F<span className="italic">ā</span>ir
-          <span className="italic text-muted-foreground"> enough</span>
+          Coffee
+          <span className="italic text-muted-foreground"> House</span>
         </Link>
         <p className="mt-1 text-xs tracking-eyebrow text-muted-foreground">Admin</p>
 

@@ -21,7 +21,7 @@ function getPath(obj: Record<string, any>, path: string): any {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     if (typeof window === "undefined") return "en";
-    const saved = window.localStorage.getItem("fair-lang") as Lang | null;
+    const saved = window.localStorage.getItem("app-lang") as Lang | null;
     return saved === "ar" || saved === "en" ? saved : "en";
   });
   const [transitioning, setTransitioning] = useState<TransitionState>("fading-out");
@@ -70,7 +70,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       setLangState(next);
       if (typeof window !== "undefined") {
-        window.localStorage.setItem("fair-lang", next);
+        window.localStorage.setItem("app-lang", next);
         window.scrollTo(0, 0);
       }
       if (typeof document !== "undefined") {
@@ -121,7 +121,7 @@ const translations = {
     },
     hero: {
       eyebrow: "Riyadh · Est. Boutique Coffee House",
-      title: "FAIR enough",
+      title: "Coffee House",
       subtitle:
         "Coffee, crafted with enough care to become unforgettable — and enough calm to be remembered.",
       ctaReserve: "Reserve a Table",
@@ -141,15 +141,15 @@ const translations = {
     ],
     philosophy: {
       eyebrow: "01 · Our Philosophy",
-      line1: "Enough",
+      line1: "Coffee",
       line1Italic: "isn't average.",
-      line2: "Enough",
+      line2: "Coffee",
       line2Italic: "is excellence.",
       body:
-        "We opened FAIR because we believed a café could feel like a room in a friend's home — warm wood, soft light, a cup made with attention. Not a chain. Not a rush. A small, considered ritual you look forward to.",
+        "We opened Coffee House because we believed a café could feel like a room in a friend's home — warm wood, soft light, a cup made with attention. Not a chain. Not a rush. A small, considered ritual you look forward to.",
       values: [
         ["Craft", "Beans sourced with care. Shots pulled with patience."],
-        ["Hospitality", "A greeting by name. A note on your cup."],
+        ["Hospitality", "Known by name. Served with heart."],
         ["Calm", "A room built for lingering, until the last hour."],
       ],
     },
@@ -231,7 +231,7 @@ const translations = {
         "Every cup made by us carries more than coffee — sometimes a wish, sometimes a memory, always a moment. It is our quietest gesture, and our most beloved.",
       quote:
         '"Someday you will smile while saying it took too long — but this is more than what I prayed for."',
-      quoteAttribution: "— found on a FAIR cup",
+      quoteAttribution: "— found on a Coffee House cup",
     },
     testimonials: {
       eyebrow: "05 · In Their Words",
@@ -260,16 +260,16 @@ const translations = {
       titleItalic: "room",
       body: "Details you'll only notice when you slow down. That's the point.",
       alts: {
-        storefront: "FAIR entrance",
-        interior: "FAIR interior",
-        espresso: "FAIR bag",
-        nightWindow: "FAIR dessert and coffee",
+        storefront: "Coffee House entrance",
+        interior: "Coffee House interior",
+        espresso: "Coffee House bag",
+        nightWindow: "Coffee House dessert and coffee",
         cupsGroup: "Purple coffee",
-        brandingPaper: "FAIR branding paper",
+        brandingPaper: "Coffee House branding paper",
       },
     },
     stats: {
-      eyebrow: "07 · Why FAIR",
+      eyebrow: "07 · Why Coffee House",
       items: [
         ["4.8", "Google rating"],
         ["250+", "Written reviews"],
@@ -284,7 +284,7 @@ const translations = {
       body:
         "Whether it is early morning or the quiet hour before close — the door is open, the light is warm, the coffee is ready.",
       addressLabel: "Address",
-      address: "Saybawiyyah, Ar Rawdah / Riyadh 13211, Saudi Arabia",
+      address: "Riyadh, Saudi Arabia",
       reservationsLabel: "Reservations",
       reservations: "Kindly notify us at least two hours before your arrival",
       parkingLabel: "Parking",
@@ -301,15 +301,15 @@ const translations = {
     },
     footer: {
       tagline: "A small letter, printed daily and handed to you warm.",
-      arabicName: "قهوة فير اينف",
+      arabicName: "بيت القهوة",
       emailPlaceholder: "Your email — occasional letters, never spam",
       send: "Send →",
       visit: "Visit",
       follow: "Follow",
-      social: ["Instagram", "TikTok", "Google"],
-      copyright: "© {{year}} FAIR enough Coffee",
+      social: ["Instagram", "GitHub", "Gmail"],
+      copyright: "© {{year}} Coffee House",
       tagline2: "Riyadh · Boutique Specialty Coffee",
-      closing: "Fair doesn't mean equal · Fair doesn't mean...",
+      closing: "Coffee doesn't mean average · Coffee means...",
     },
     langSwitcher: {
       en: "English",
@@ -330,7 +330,7 @@ const translations = {
     },
     hero: {
       eyebrow: "الرياض · بيت قهوة بوتيكي",
-      title: "FAIR enough",
+      title: "Coffee House",
       subtitle:
         "قهوة صُنعت بعناية كافية لتبقى في الذاكرة — وهدوء كافٍ لتُروى عنها.",
       ctaReserve: "احجز طاولتك",
@@ -355,7 +355,7 @@ const translations = {
       line2: "الكافي",
       line2Italic: "هو التميز.",
       body:
-        "فتحنا فير لأننا آمنّا بأن المقهى يمكن أن يكون كغرفة في بيت صديق — خشب دافئ، ضوء ناعم، كوب صُنع باهتمام. ليس سلسلة، لا عجلة. طقس صغير مدروس تتطلع إليه.",
+        "فتحنا بيت القهوة لأننا آمنّا بأن المقهى يمكن أن يكون كغرفة في بيت صديق — خشب دافئ، ضوء ناعم، كوب صُنع باهتمام. ليس سلسلة، لا عجلة. طقس صغير مدروس تتطلع إليه.",
       values: [
         ["الحرفية", "حبوب تُختار بعناية. إكسبرسو يُسحب بهدوء."],
         ["الضيافة", "تحية باسمك. رسالة على كوبك."],
@@ -440,7 +440,7 @@ const translations = {
         "كل كوب نصنعه يحمل أكثر من قهوة — أحياناً أمنية، وأحياناً ذكرى، دائماً لحظة. إنها أهدئ هديتنا وأحبّها.",
       quote:
         '"سيأتي يوم تبتسم فيه وأنت تقول إنها طالت — لكن هذا أكثر مما دعوت به."',
-      quoteAttribution: "— عُثر عليها على كوب من فير",
+      quoteAttribution: "— عُثر عليها على كوب من بيت القهوة",
     },
     testimonials: {
       eyebrow: "٠٥ · بكلماتهم",
@@ -469,16 +469,16 @@ const translations = {
       titleItalic: "المكان",
       body: "تفاصيل لن تلاحظها إلا عندما تبطئ. هذا هو المقصد.",
       alts: {
-        storefront: "مدخل فير",
-        interior: "داخل فير",
-        espresso: "حقيبة فير",
-        nightWindow: "حلويات وقهوة فير",
+        storefront: "مدخل بيت القهوة",
+        interior: "داخل بيت القهوة",
+        espresso: "حقيبة بيت القهوة",
+        nightWindow: "حلويات وقهوة بيت القهوة",
         cupsGroup: "قهوة بنفسجية",
-        brandingPaper: "ورق تعريف فير",
+        brandingPaper: "ورق تعريف بيت القهوة",
       },
     },
     stats: {
-      eyebrow: "٠٧ · لماذا فير",
+      eyebrow: "٠٧ · لماذا بيت القهوة",
       items: [
         ["٤.٨", "تقييم غوغل"],
         ["+٢٥٠", "تقييم مكتوب"],
@@ -493,7 +493,7 @@ const translations = {
       body:
         "سواء كان الصباح الباكر أو الساعة الهادئة قبل الإغلاق — الباب مفتوح، الضوء دافئ، والقهوة جاهزة.",
       addressLabel: "العنوان",
-      address: "الصيبوية، الروضة / الرياض ١٣٢١١، المملكة العربية السعودية",
+      address: "الرياض، المملكة العربية السعودية",
       reservationsLabel: "الحجوزات",
       reservations: "يرجى إبلاغنا قبل ساعتين من وصولك",
       parkingLabel: "المواقف",
@@ -510,15 +510,15 @@ const translations = {
     },
     footer: {
       tagline: "رسالة صغيرة، تُطبع يومياً وتُقدم إليك دافئة.",
-      arabicName: "قهوة فير اينف",
+      arabicName: "بيت القهوة",
       emailPlaceholder: "بريدك — رسائل أحياناً، لا رسائل مزعجة",
       send: "إرسال →",
       visit: "الزيارة",
       follow: "تابعنا",
-      social: ["إنستغرام", "تيك توك", "غوغل"],
-      copyright: "© {{year}} قهوة فير اينف",
+      social: ["إنستغرام", "جيتهب", "جي ميل"],
+      copyright: "© {{year}} بيت القهوة",
       tagline2: "الرياض · قهوة مختصة بوتيكية",
-      closing: "Fair لا يعني متساوٍ · Fair يعني...",
+      closing: "القهوة لا تعني عادية · القهوة تعني...",
     },
     langSwitcher: {
       en: "English",

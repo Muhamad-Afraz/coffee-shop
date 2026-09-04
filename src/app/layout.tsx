@@ -28,13 +28,13 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fair-enoughcoffee.vercel.app"),
-  title: "FAIR enough — Specialty Coffee, Riyadh",
+  metadataBase: new URL("https://coffee-house.vercel.app"),
+  title: "Coffee House — Specialty Coffee, Riyadh",
   description:
     "A boutique specialty coffee house in Riyadh. Handwritten cups, warm hospitality, quiet luxury — open until 2 AM.",
-  authors: [{ name: "FAIR enough Coffee" }],
+  authors: [{ name: "Coffee House" }],
   openGraph: {
-    title: "FAIR enough — Specialty Coffee, Riyadh",
+    title: "Coffee House — Specialty Coffee, Riyadh",
     description:
       "A boutique specialty coffee house in Riyadh. Handwritten cups, warm hospitality, quiet luxury.",
     type: "website",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 const langInitScript = `
 (function() {
   try {
-    var lang = localStorage.getItem('fair-lang');
+    var lang = localStorage.getItem('app-lang');
     if (lang === 'ar' || lang === 'en') {
       document.documentElement.lang = lang;
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';

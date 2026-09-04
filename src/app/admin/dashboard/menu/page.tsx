@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteContent, type MenuItem } from "@/lib/site-content";
@@ -10,6 +10,11 @@ export default function MenuPage() {
   const [coffeeItems, setCoffeeItems] = useState<MenuItem[]>(content.coffeeItems);
   const [dessertItems, setDessertItems] = useState<MenuItem[]>(content.dessertItems);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setCoffeeItems(content.coffeeItems);
+    setDessertItems(content.dessertItems);
+  }, [content.coffeeItems, content.dessertItems]);
 
   function addCoffee() {
     setCoffeeItems([...coffeeItems, { name: "", note: "", price: "", body: "" }]);

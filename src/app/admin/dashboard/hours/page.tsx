@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteContent, type HoursEntry } from "@/lib/site-content";
@@ -12,6 +12,13 @@ export default function HoursPage() {
   const [parking, setParking] = useState(content.parking);
   const [reservations, setReservations] = useState(content.reservations);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setHours(content.hours);
+    setAddress(content.address);
+    setParking(content.parking);
+    setReservations(content.reservations);
+  }, [content.hours, content.address, content.parking, content.reservations]);
 
   function addHour() {
     setHours([...hours, { label: "", time: "" }]);

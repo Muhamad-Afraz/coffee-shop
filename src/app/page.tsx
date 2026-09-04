@@ -1,12 +1,12 @@
 "use client";
 
 import { I18nProvider } from "@/lib/i18n";
-import { FairPage } from "@/components/FairPage";
+import { CoffeePage } from "@/components/CoffeePage";
 
 export default function Home() {
   return (
     <I18nProvider>
-      <FairPage />
+      <CoffeePage />
     </I18nProvider>
   );
 }

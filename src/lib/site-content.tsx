@@ -42,7 +42,7 @@ const DEFAULTS: SiteContent = {
     { label: "Friday", time: "12:30 PM — 2:00 AM" },
     { label: "Saturday", time: "6:00 AM — 1:00 AM" },
   ],
-  address: "Saybawiyyah, Ar Rawdah / Riyadh 13211, Saudi Arabia",
+  address: "Riyadh, Saudi Arabia",
   parking: "Street parking",
   reservations: "Kindly notify us at least two hours before your arrival",
   coffeeItems: [],

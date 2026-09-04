@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "84a04f92-9723-4eae-aa1b-2c8aa7509d25",
+    "text": "A lovely spot for a quiet afternoon coffee. Smooth latte, welcoming staff, and a calm atmosphere you can really relax in.",
+    "name": "Muhamad",
+    "tag": "Visitor",
+    "rating": 4,
+    "createdAt": "2026-09-02T16:20:11.611Z"
+  },
+  {
+    "id": "a558f10b-659b-45c5-a6c6-3c412afff3cd",
+    "text": "The most thoughtfully run coffee house I've visited. The espresso was rich and clean, and the atmosphere was calm enough to actually get work done. I'll be back.",
+    "name": "Peter",
+    "tag": "Visitor",
+    "rating": 5,
+    "createdAt": "2026-09-02T16:20:27.918Z"
+  },
+  {
+    "id": "05197967-b6b1-4ff3-98f0-92daa0c22cf2",
+    "text": "Came for the coffee, stayed for the hospitality. The signature drink was fantastic, the pastries perfect — and they remembered my order. This is what a neighborhood coffee house should be.",
+    "name": "Andrew",
+    "tag": "Visitor",
+    "rating": 5,
+    "createdAt": "2026-09-02T16:20:40.671Z"
+  }
+]

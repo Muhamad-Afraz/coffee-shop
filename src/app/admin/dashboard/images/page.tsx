@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useSiteContent, type SiteImages } from "@/lib/site-content";
@@ -16,6 +16,10 @@ function ImageSlot({ label, currentSrc, onChange }: ImageSlotProps) {
   const [preview, setPreview] = useState(currentSrc);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setPreview(currentSrc);
+  }, [currentSrc]);
+
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -30,7 +34,12 @@ function ImageSlot({ label, currentSrc, onChange }: ImageSlotProps) {
         onChange(data.path);
         toast.success("Image uploaded");
       } else {
-        toast.error("Upload failed");
+        try {
+          const err = await res.json();
+          toast.error(err.error || "Upload failed");
+        } catch {
+          toast.error("Upload failed");
+        }
       }
     } catch {
       toast.error("Upload failed");
@@ -79,6 +88,10 @@ function GalleryImageSlot({ label, index, currentSrc, onChange, onRemove }: Gall
   const [preview, setPreview] = useState(currentSrc);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setPreview(currentSrc);
+  }, [currentSrc]);
+
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -93,7 +106,12 @@ function GalleryImageSlot({ label, index, currentSrc, onChange, onRemove }: Gall
         onChange(index, data.path);
         toast.success("Image uploaded");
       } else {
-        toast.error("Upload failed");
+        try {
+          const err = await res.json();
+          toast.error(err.error || "Upload failed");
+        } catch {
+          toast.error("Upload failed");
+        }
       }
     } catch {
       toast.error("Upload failed");
@@ -131,6 +149,10 @@ export default function ImagesPage() {
   const { content, refresh } = useSiteContent();
   const [images, setImages] = useState<SiteImages>(content.images);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setImages(content.images);
+  }, [content.images]);
 
   function updateImage(key: keyof SiteImages, value: string) {
     setImages({ ...images, [key]: value });

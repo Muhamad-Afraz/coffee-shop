@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[Fair Enough Error]", error);
+    console.error("[Coffee House Error]", error);
   }, [error]);
 
   return (
