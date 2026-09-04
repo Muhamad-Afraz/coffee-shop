@@ -246,7 +246,7 @@ function Hero() {
             {t("hero.subtitle")}
           </p>
           <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-3">
-            <a href="#visit" onClick={(e) => { e.preventDefault(); lenis?.scrollTo("#visit", { duration: scrollDuration("#visit") }); }} className="btn-primary" style={{ background: "var(--ivory)", color: "var(--espresso)" }}>
+            <a href="/admin/login" className="btn-primary" style={{ background: "var(--ivory)", color: "var(--espresso)" }}>
               {t("hero.ctaReserve")}
             </a>
             <a href="#coffee" onClick={(e) => { e.preventDefault(); lenis?.scrollTo("#coffee", { duration: scrollDuration("#coffee") }); }} className="btn-ghost">{t("hero.ctaMenu")}</a>

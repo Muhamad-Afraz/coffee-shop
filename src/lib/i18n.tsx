@@ -124,7 +124,7 @@ const translations = {
       title: "Coffee House",
       subtitle:
         "Coffee, crafted with enough care to become unforgettable — and enough calm to be remembered.",
-      ctaReserve: "Reserve a Table",
+      ctaReserve: "Try Admin Panel",
       ctaMenu: "View the Menu",
       rating: "★ 4.8 · 250+ reviews",
       hours: "Fine coffee made with care",
@@ -333,7 +333,7 @@ const translations = {
       title: "Coffee House",
       subtitle:
         "قهوة صُنعت بعناية كافية لتبقى في الذاكرة — وهدوء كافٍ لتُروى عنها.",
-      ctaReserve: "احجز طاولتك",
+      ctaReserve: "جرّب لوحة التحكم",
       ctaMenu: "اكتشف القائمة",
       rating: "★ ٤.٨ · +٢٥٠ تقييم",
       hours: "قهوة مختارة بعناية",
